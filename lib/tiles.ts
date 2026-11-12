@@ -1,7 +1,8 @@
 import "server-only";
 /**
  * Raw-detection export from the 1° gzip CSV tiles (free-tier design: detections are not in
- * Postgres). Tiles live in a GitHub Release in production and in data/tiles locally / in CI.
+ * Postgres). Tiles live in the public Vercel Blob store "agni-tiles" in production (uploaded by
+ * scripts/upload-tiles.mjs, checksums verified) and in data/tiles locally / in CI.
  * Each tile is sorted by date, so reading stops as soon as the date range is passed.
  */
 import { createReadStream } from "node:fs";
@@ -9,9 +10,9 @@ import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { BboxTuple } from "@/lib/aoi";
 
-/** Public release that holds the tiles (dataset version data-v1). */
+/** Public Vercel Blob location of the tiles (dataset version data-v1). */
 export const DEFAULT_TILES_BASE_URL =
-  "https://github.com/mahfuzhasanreza/agni-calendar/releases/download/data-v1";
+  "https://bkzfzh1vawqsplfa.public.blob.vercel-storage.com/tiles/data-v1";
 
 export type TileInfo = {
   key: string;

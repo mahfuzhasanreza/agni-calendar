@@ -45,6 +45,37 @@ def _copy(cur: psycopg.Cursor, table: str, columns: list[str], df: pd.DataFrame)
             copy.write(chunk)
 
 
+# Must match FLAG_BY_RANK in lib/sql/analyze.ts ("least observed" flag wins in a sum).
+FLAG_RANK_SQL = """CASE source_flag
+    WHEN 'gap_filled' THEN 5 WHEN 'terra_only_calibrated' THEN 4
+    WHEN 'n20_calibrated' THEN 3 WHEN 'calibrated' THEN 2
+    WHEN 'observed_nrt' THEN 1 ELSE 0 END"""
+
+
+def _rebuild_tile_rollup(cur: psycopg.Cursor) -> None:
+    """1° tiles and tile-month sums, so large areas read ~300 rows per tile instead of ~30,000."""
+    cur.execute("DELETE FROM tile")
+    cur.execute(
+        """INSERT INTO tile (id, geom)
+           SELECT DISTINCT tile_id,
+                  ST_MakeEnvelope(tile_id % 1000, tile_id / 1000,
+                                  tile_id % 1000 + 1, tile_id / 1000 + 1, 4326)
+           FROM cell"""
+    )
+    cur.execute("TRUNCATE tile_month")
+    cur.execute(
+        f"""INSERT INTO tile_month (tile_id, month, det_modis_t, det_modis_a, det_viirs_snpp,
+                                  det_viirs_n20, harm, harm_lo, harm_hi, flag_rank)
+            SELECT c.tile_id, cm.month, sum(cm.det_modis_t), sum(cm.det_modis_a),
+                   sum(cm.det_viirs_snpp), sum(cm.det_viirs_n20), sum(cm.harm),
+                   sum(cm.harm_lo), sum(cm.harm_hi), max({FLAG_RANK_SQL})
+            FROM cell_month cm JOIN cell c ON c.id = cm.cell_id
+            GROUP BY c.tile_id, cm.month"""
+    )
+    cur.execute("ANALYZE tile")
+    cur.execute("ANALYZE tile_month")
+
+
 def _start_run(conninfo: str, kind: str, rows_in: int) -> int:
     with psycopg.connect(conninfo, autocommit=True) as conn:
         row = conn.execute(
@@ -111,7 +142,8 @@ def load_all(
                 )
             cur.execute(
                 """INSERT INTO cell
-                     (id, "row", col, res, center_lat, center_lon, geom, ever_active, zone_id)
+                     (id, "row", col, res, center_lat, center_lon, geom, ever_active, zone_id,
+                      tile_id)
                    SELECT id, "row", col, res, center_lat, center_lon,
                           ST_MakeEnvelope(
                             round((%(w)s + col * %(r)s)::numeric, 6)::float8,
@@ -119,13 +151,16 @@ def load_all(
                             round((%(w)s + (col + 1) * %(r)s)::numeric, 6)::float8,
                             round((%(s)s + ("row" + 1) * %(r)s)::numeric, 6)::float8,
                             4326),
-                          ever_active, zone_id
+                          ever_active, zone_id,
+                          (floor(%(s)s + ("row" + 0.5) * %(r)s) * 1000
+                           + floor(%(w)s + (col + 0.5) * %(r)s))::int
                    FROM stage_cell""",
                 {"w": cfg.west, "s": cfg.south, "r": cfg.grid_res},
             )
 
             cur.execute("TRUNCATE cell_month")
             _copy(cur, "cell_month", CELL_MONTH_COLUMNS, cm)
+            _rebuild_tile_rollup(cur)
 
             version = model_run["model_version"]
             cur.execute("DELETE FROM model_run WHERE model_version = %s", (version,))

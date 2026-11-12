@@ -71,6 +71,7 @@ A web app that turns 25 years of MODIS + VIIRS hotspots into a **single, sensor-
 
 ### 3.3 Stretch features (only after MVP is green and deployed)
 
+- ~~Shareable link~~ **done in M10**: `?preset=…|aoi=<json>&mode=&start=&end=&month=` (lib/url-state.ts), "Copy link to this view" button; the explorer is client-only (`components/ExplorerClient.tsx`).
 - **Near-real-time:** nightly scheduled ingestion of the latest VIIRS NRT data via the FIRMS API, so "this month" is live.
 - **Anomaly watchlist:** top cells in the region currently burning above their historical P90.
 - **Shareable link:** AOI + date range encoded in the URL.
@@ -182,7 +183,7 @@ Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, a
 | Tests | Vitest (unit), Playwright (e2e smoke), pytest (pipeline) |
 | Lint/format | ESLint, Prettier, Ruff |
 | CI/CD | **GitHub Actions** |
-| Hosting | **Free tier:** Vercel Hobby (app) + Neon free Postgres with PostGIS (aggregates only, Singapore) + GitHub Release `data-vN` (raw detections as 1° gzip CSV tiles) |
+| Hosting | **Free tier:** Vercel Hobby (app) + Neon free Postgres with PostGIS (aggregates only, Singapore) + Vercel Blob store `agni-tiles` (raw detections as 1° gzip CSV tiles, Singapore) |
 | Local dev | Docker Compose `postgis/postgis:18-3.6` on **port 5434** (`pnpm db:up`). In `.env`, `DATABASE_URL`/`DIRECT_URL` point at the **local** DB; production Neon URLs are kept as `NEON_DATABASE_URL`/`NEON_DIRECT_URL` and are only used explicitly (production loads). Prisma 7.10.1 (`prisma.config.ts`, `prisma-client` generator → `lib/generated/prisma`, `@prisma/adapter-pg`) |
 
 Accessible color ramps only: **viridis / cividis** for the heatmap; never red-green. Every chart has a text/table alternative.
@@ -201,7 +202,7 @@ FIRMS archive CSVs ──► pipeline/ (Python)
 FIRMS API (nightly) ─┘   clean → grid → aggregate → calibrate → validate
                               │
                               ▼
-            PostgreSQL + PostGIS (Neon)          Detection tiles (GitHub Release)
+            PostgreSQL + PostGIS (Neon)          Detection tiles (Vercel Blob)
    (cell, cell_month, model_run, region)        1° gzip CSV + manifest.json
                               │  Prisma + $queryRaw         │ fetch (export only)
                               ▼                             ▼
@@ -230,7 +231,7 @@ docker-compose.yml
 
 ### 7.2 Data model (final schema: `docs/PLAN.md` §3)
 
-- **No `Detection` table** (free tier: 5.94 M rows ≈ 1 GB would not fit comfortably in Neon's free 1 GB). Raw `type=0` detections (archive + NRT, all confidence levels) are written by the pipeline as **1°×1° gzip CSV tiles + `manifest.json`** and published as a GitHub Release `data-vN`. Only the detections export reads them (`TILES_BASE_URL`).
+- **No `Detection` table** (free tier: 5.94 M rows ≈ 1 GB would not fit comfortably in Neon's free 1 GB). Raw `type=0` detections (archive + NRT, all confidence levels) are written by the pipeline as **1°×1° gzip CSV tiles + `manifest.json`** and uploaded to the Vercel Blob store `agni-tiles` (`tiles/data-vN/`). Only the detections export reads them (`TILES_BASE_URL`).
 - `Cell` – deterministic id (row*10000+col), res, center lat/lon, `geom` polygon (GiST), zone_id, ever_active.
 - `Zone` – calibration strata (MVP: long-term MODIS activity strata).
 - `CellMonth` – PK (cell_id, month); holds **only the active model version** (~2.35 M rows, ~250 MB). SmallInt raw counts (MODIS T/A, VIIRS S-NPP/N20), modis_ref, harmonized value/low/high for the **headline metric**, source_flag (observed / observed_nrt / calibrated / terra_only_calibrated / n20_calibrated / gap_filled). **Dense** for every ever-active cell (harmonized MODIS=0 is not 0).
@@ -245,12 +246,14 @@ AOI can be passed as GeoJSON polygon, bbox, or `lat,lon,radius_km`, or a preset 
 
 - `GET /api/regions` – preset AOIs.
 - `POST /api/analyze` – body: AOI, start, end, mode (`harmonized` | `raw`), metric, selectedMonth, baseline → monthly series + calendar matrix (with source flags) + season profile (median, P10–P90, selected year) + anomaly (count, median, percentile, ratio, robust z, label) + annual totals with Sen's slope / Mann–Kendall. One AOI query serves all panels; a CDN-cacheable `GET ?preset=` variant exists for presets.
-- `GET|POST /api/export/detections` – streamed CSV of raw detections in AOI/date range, read from the tiles that intersect the AOI (date filter + exact point-in-polygon in Node; boundary points count as inside; tiles are date-sorted so reading stops early; cap 500k rows with a `# truncated` note line). Tiles come from `TILES_BASE_URL`, default = the `data-v1` GitHub Release (`lib/tiles.ts`); local/CI use `file://./data/tiles`. Verified: CHT 2014 = 26,239 rows, identical to an independent count; whole CHT record (418k rows) in 2.4 s locally.
+- `GET|POST /api/export/detections` – streamed CSV of raw detections in AOI/date range, read from the tiles that intersect the AOI (date filter + exact point-in-polygon in Node; boundary points count as inside; tiles are date-sorted so reading stops early; cap 500k rows with a `# truncated` note line). Tiles come from `TILES_BASE_URL`, default = the public **Vercel Blob** store `agni-tiles` (`…blob.vercel-storage.com/tiles/data-v1`, uploaded with `node --env-file=.env scripts/upload-tiles.mjs`; the GitHub Release was never published); local/CI use `file://./data/tiles`. Verified: CHT 2014 = 26,239 rows, identical to an independent count; whole CHT record (418k rows) in 2.4 s locally.
 - `GET|POST /api/export/series` – monthly harmonized series CSV (P10–P90, source flag, every raw sensor).
 - `GET /api/method` – calibration model versions + validation metrics for the Method page.
 - `GET /api/health` – DB connectivity + latest ingest date.
 
 Performance target: any AOI query **< 1.5 s** on the deployed app.
+
+**Performance (M10):** a 1° tile rollup (`tile`, `tile_month`, `cell.tile_id`; rebuilt by the loader in the same transaction) lets fully covered tiles read 313 pre-summed rows instead of ~30,000 cell-months; only boundary tiles go cell by cell (their cells are picked by `tile_id`, with the intersection test inside the weight; a GiST probe per tile was 20× slower). Results are identical to the cell path (max diff 0.02 from float32). Local: whole region 0.90 → 0.02 s, large polygon 0.37 → 0.13 s, presets ≈ 0.05 s. The UI requests presets with the CDN-cacheable GET, and deploy.yml warms those URLs after each deploy. **Schema changes that new code depends on must be migrated + loaded in production before merging** (additive migrations are safe for the running code).
 
 **Implemented (M4):** `GET /api/regions`, `POST /api/analyze`, `GET /api/analyze?preset=` (CDN-cacheable). Presets are **approximate bounding boxes in `lib/regions.ts`** (the `region` table is unused for now). The anomaly defaults to the **latest complete month** (`ingest_run.data_to` stores the real last detection date). The selected month is compared with the same calendar month in the baseline years **excluding its own year**. Measured on the full data (local): CHT ≈ 0.1 s, whole region ≈ 1.2 s. SQL rule: the per-cell weight CTE must be `MATERIALIZED`, otherwise Postgres inlines it and recomputes the spatial weight for every cell-month row (28 s instead of 1 s).
 

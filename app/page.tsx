@@ -1,4 +1,4 @@
-import { Explorer } from "@/components/Explorer";
+import { ExplorerClient } from "@/components/ExplorerClient";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 
 export default function Home() {
@@ -6,7 +6,7 @@ export default function Home() {
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6">
       <SiteHeader current="explorer" />
       <main className="flex flex-col gap-6">
-        <Explorer />
+        <ExplorerClient />
       </main>
       <SiteFooter />
     </div>
