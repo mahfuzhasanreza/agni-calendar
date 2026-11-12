@@ -1,0 +1,152 @@
+// Agni database schema. Design and rationale: docs/PLAN.md §3.
+// Free-tier design: raw detections are NOT stored here (they live in GitHub Release tiles).
+// Geometry columns are written only by the Python pipeline (COPY + PostGIS functions) and read
+// with $queryRaw; the Prisma client never writes them.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Sensor {
+  MODIS_T
+  MODIS_A
+  VIIRS_SNPP
+  VIIRS_N20
+  VIIRS_N21
+}
+
+enum SourceFlag {
+  observed
+  observed_nrt
+  calibrated
+  terra_only_calibrated
+  n20_calibrated
+  gap_filled
+}
+
+enum IngestStatus {
+  running
+  success
+  failed
+}
+
+/// Calibration strata (MVP: long-term MODIS activity strata).
+model Zone {
+  id          Int     @id
+  name        String
+  description String?
+  cells       Cell[]
+
+  @@map("zone")
+}
+
+/// Regular grid cell. id = row * 10000 + col (identical in Python and SQL).
+model Cell {
+  id         Int                                   @id
+  row        Int                                   @db.SmallInt
+  col        Int                                   @db.SmallInt
+  res        Float                                 @db.Real
+  centerLat  Float                                 @map("center_lat") @db.Real
+  centerLon  Float                                 @map("center_lon") @db.Real
+  geom       Unsupported("geometry(Polygon,4326)")
+  zoneId     Int?                                  @map("zone_id")
+  zone       Zone?                                 @relation(fields: [zoneId], references: [id])
+  everActive Boolean                               @default(false) @map("ever_active")
+
+  @@index([geom], type: Gist)
+  @@map("cell")
+}
+
+/// One row per ever-active cell per month, for the ACTIVE model version only (dense).
+model CellMonth {
+  cellId       Int        @map("cell_id")
+  /// First day of the month (UTC).
+  month        DateTime   @db.Date
+  detModisT    Int        @default(0) @map("det_modis_t") @db.SmallInt
+  detModisA    Int        @default(0) @map("det_modis_a") @db.SmallInt
+  detViirsSnpp Int        @default(0) @map("det_viirs_snpp") @db.SmallInt
+  detViirsN20  Int        @default(0) @map("det_viirs_n20") @db.SmallInt
+  /// MODIS reference value: Terra + Aqua, or scaled Terra-only before Jul 2002.
+  modisRef     Float?     @map("modis_ref") @db.Real
+  /// Harmonized headline metric, in VIIRS S-NPP-equivalent units.
+  harm         Float      @db.Real
+  harmLo       Float      @map("harm_lo") @db.Real
+  harmHi       Float      @map("harm_hi") @db.Real
+  sourceFlag   SourceFlag @map("source_flag")
+
+  @@id([cellId, month])
+  @@map("cell_month")
+}
+
+model ModelRun {
+  modelVersion  String             @id @map("model_version") @db.VarChar(32)
+  /// Headline metric served by cell_month: detections | fire_days.
+  metric        String
+  /// Selected method: quantile_mapping | loglog | ratio.
+  method        String
+  gridRes       Float              @map("grid_res") @db.Real
+  calibFrom     Int                @map("calib_from")
+  calibTo       Int                @map("calib_to")
+  metrics       Json
+  cvPredictions Json               @map("cv_predictions")
+  isActive      Boolean            @default(false) @map("is_active")
+  notes         String?
+  createdAt     DateTime           @default(now()) @map("created_at")
+  strata        CalibrationModel[]
+
+  @@map("model_run")
+}
+
+model CalibrationModel {
+  id           Int      @id @default(autoincrement())
+  modelVersion String   @map("model_version") @db.VarChar(32)
+  run          ModelRun @relation(fields: [modelVersion], references: [modelVersion], onDelete: Cascade)
+  /// detections | fire_days
+  metric       String
+  zoneId       Int      @map("zone_id")
+  /// dry | wet | terra_scale | n20_scale
+  season       String
+  method       String
+  params       Json
+  metrics      Json
+
+  @@unique([modelVersion, metric, zoneId, season, method])
+  @@map("calibration_model")
+}
+
+/// Preset areas of interest (hero stories).
+model Region {
+  id          Int                                        @id @default(autoincrement())
+  slug        String                                     @unique
+  name        String
+  nameBn      String?                                    @map("name_bn")
+  description String
+  story       String?
+  geom        Unsupported("geometry(MultiPolygon,4326)")
+  sortOrder   Int                                        @default(0) @map("sort_order")
+
+  @@map("region")
+}
+
+/// Audit log of pipeline / NRT runs.
+model IngestRun {
+  id         Int          @id @default(autoincrement())
+  /// archive | nrt | calibration | sample
+  kind       String
+  sensor     Sensor?
+  startedAt  DateTime     @default(now()) @map("started_at")
+  finishedAt DateTime?    @map("finished_at")
+  rowsIn     Int?         @map("rows_in")
+  rowsLoaded Int?         @map("rows_loaded")
+  dataFrom   DateTime?    @map("data_from") @db.Date
+  dataTo     DateTime?    @map("data_to") @db.Date
+  status     IngestStatus
+  message    String?
+
+  @@map("ingest_run")
+}

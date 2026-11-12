@@ -347,7 +347,7 @@ export const AnalyzeRequest = z.object({
 |---|---|---|---|
 | M0 | Thu/Fri (no code) | FIRMS archive request, MAP_KEY, GitHub repo (`main`), Vercel project, DB with PostGIS | requests confirmed; accounts exist |
 | M1 | Sat H0–1 | ✅ Scaffold Next.js 16.4/TS/Tailwind v4 (shadcn moved to M5), ESLint/Prettier/Vitest, `ci.yml` (web job), `deploy.yml`, hello page | public URL live; CI green on `main` |
-| M2 | H1–2.5 | docker-compose, Prisma schema + PostGIS migrations, `/api/health`, migrate in deploy | prod `/api/health` → db ok + PostGIS version |
+| M2 | H1–2.5 | ✅ docker-compose, Prisma schema + PostGIS migrations, `/api/health`, migrate in deploy | prod `/api/health` → db ok + PostGIS version |
 | M3 | H1–5 (data) | ingest → clean → grid → aggregate → load, sample, pytest job | `agni all --sample` fills local DB; full region in prod as `raw-v0` |
 | M4 | H2.5–5 (backend) | `contracts.ts` + mock JSON (H2.5), `lib/aoi`, `lib/stats`, `/api/regions`, `/api/analyze` | vitest green; CHT analyze < 1.5 s locally |
 | M5 | H2–8 (frontend) | map + AOI inputs + presets, CalendarHeatmap, mode toggle | **MVP-0 on prod ~H8**: CHT → real 25-year calendar |

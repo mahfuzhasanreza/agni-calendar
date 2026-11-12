@@ -1,0 +1,23 @@
+# Local development database: PostgreSQL 18 + PostGIS 3.6 (same versions as Neon production).
+#   pnpm db:up      start it (port 5434, so it doesn't clash with a system Postgres)
+#   pnpm db:down    stop it (data is kept in the named volume)
+services:
+  db:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_USER: agni
+      POSTGRES_PASSWORD: agni
+      POSTGRES_DB: agni
+    ports:
+      - "5434:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/<major>/...
+      - agni-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agni -d agni"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  agni-db:

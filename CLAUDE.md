@@ -169,7 +169,7 @@ Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, a
 |---|---|
 | Language | TypeScript (strict) for app, Python 3.12 for pipeline |
 | Web app | **Next.js** (latest stable, App Router) for UI + API |
-| Backend runtime | **Node.js 26** (`.nvmrc`, Vercel `26.x`). **Next.js 16.4** with `cacheComponents` on: `export const dynamic` / `revalidate` are **removed** (route handlers are uncached by default; caching is opt-in via `use cache`). All API Route Handlers run on the Node.js runtime (`export const runtime = "nodejs"`, the default; Edge is deprecated) plus an explicit `maxDuration`, not Edge, because Prisma, PostGIS queries and streamed CSV exports need it. Small Node.js (TypeScript) scripts in `/scripts` for seeding, health checks and NRT ingestion helpers |
+| Backend runtime | **Node.js 26** (`.nvmrc`, Vercel `26.x`). **Next.js 16.4** with `cacheComponents` on: `export const dynamic` / `revalidate` are **removed** (route handlers are uncached by default; caching is opt-in via `use cache`). All API Route Handlers run on the Node.js runtime, which is the default (Edge is deprecated). **Do not write `export const runtime`**: Next 16 with `cacheComponents` rejects it at build time. Set an explicit `maxDuration`, and call `await connection()` (from `next/server`) before any DB query so it never runs during `next build`. Not Edge, because Prisma, PostGIS queries and streamed CSV exports need it. Small Node.js (TypeScript) scripts in `/scripts` for seeding, health checks and NRT ingestion helpers |
 | ORM / DB | **Prisma** + **PostgreSQL** with **PostGIS** (spatial queries via `$queryRaw`) |
 | Styling | **TailwindCSS** (v4) + shadcn/ui components (initialised in M5, when the first UI components are needed) |
 | Map | MapLibre GL JS + a draw plugin (polygon / rectangle) with free basemap tiles |
@@ -179,7 +179,7 @@ Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, a
 | Lint/format | ESLint, Prettier, Ruff |
 | CI/CD | **GitHub Actions** |
 | Hosting | **Free tier:** Vercel Hobby (app) + Neon free Postgres with PostGIS (aggregates only, Singapore) + GitHub Release `data-vN` (raw detections as 1° gzip CSV tiles) |
-| Local dev | Docker Compose with `postgis/postgis` image |
+| Local dev | Docker Compose `postgis/postgis:18-3.6` on **port 5434** (`pnpm db:up`). In `.env`, `DATABASE_URL`/`DIRECT_URL` point at the **local** DB; production Neon URLs are kept as `NEON_DATABASE_URL`/`NEON_DIRECT_URL` and are only used explicitly (production loads). Prisma 7.10.1 (`prisma.config.ts`, `prisma-client` generator → `lib/generated/prisma`, `@prisma/adapter-pg`) |
 
 Accessible color ramps only: **viridis / cividis** for the heatmap; never red-green. Every chart has a text/table alternative.
 

@@ -26,7 +26,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile # also runs `prisma generate` (postinstall)
+      - run: pnpm exec prisma validate
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
@@ -35,6 +36,44 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: "1"
 
+  database:
+    name: Database (migrations, drift, health)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6 # same versions as Neon production
+        env:
+          POSTGRES_USER: agni
+          POSTGRES_PASSWORD: agni
+          POSTGRES_DB: agni
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agni -d agni"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgresql://agni:agni@localhost:5432/agni
+      DIRECT_URL: postgresql://agni:agni@localhost:5432/agni
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations to an empty database
+        run: pnpm db:deploy
+      - name: Schema drift check (database must match schema.prisma exactly)
+        run: pnpm db:drift
+      - run: pnpm build
+      - name: Health endpoint answers with PostGIS
+        run: |
+          pnpm start &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health -o health.json && break; sleep 1; done
+          cat health.json
+          python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'], r"
+
   # Added in later milestones:
   #   pipeline (M3): ruff + pytest on pipeline/ with data/sample
-  #   e2e (M9): PostGIS service container, migrations, sample load, Playwright
+  #   e2e (M9): sample load + Playwright smoke tests
