@@ -104,8 +104,10 @@ sensor switch) in every test area:
 | Sundarbans | ×1.20 | ×36.4 | ×2.57 (see limitations) |
 
 **The result that matters for users:** in the Chittagong Hill Tracts the raw record shows a
-significant *increase* of +442 hotspots/year (Sen's slope, Mann–Kendall p = 0.0004, 2001–2025);
-the harmonized record shows a significant *decrease* of −460 hotspots/year (p = 0.0035).
+significant *increase* of +374 hotspots/year (Sen's slope, Mann–Kendall p = 0.004, 2003–2025);
+the harmonized record shows a significant *decrease* of −470 hotspots/year (p = 0.001). Trends
+start in 2003, the first full year with both MODIS satellites: in the hills Terra alone sees only
+~1/20 of Aqua's fires (morning vs afternoon overpass), so 2000–2002 are the least certain years.
 
 ## 5 · Uncertainty bands
 
@@ -123,7 +125,7 @@ median, P10, P25, P75, P90. The selected month (default: latest complete month) 
 percentile rank (mid-rank), ratio to the median and robust z-score, and a label:
 `< P25` below normal · `P25–P75` normal · `P75–P90` above normal · `> P90` extreme. The selected
 year is excluded from its own baseline. Annual trends use Sen's slope with the Mann–Kendall test
-over complete years.
+over complete years from 2003.
 
 ## 7 · Limitations
 

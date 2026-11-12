@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AnnualChart } from "@/components/charts/AnnualChart";
 import { CalendarHeatmap } from "@/components/charts/CalendarHeatmap";
+import { RawVsHarmonizedChart } from "@/components/charts/RawVsHarmonizedChart";
+import { SeasonChart } from "@/components/charts/SeasonChart";
+import { AnomalyCard } from "@/components/panels/AnomalyCard";
 import { AoiPanel } from "@/components/panels/AoiPanel";
 import { CalendarTable } from "@/components/panels/CalendarTable";
 import { ModeToggle, type Mode } from "@/components/panels/ModeToggle";
@@ -40,6 +44,7 @@ export function Explorer() {
   const [mode, setMode] = useState<Mode>("harmonized");
   const [start, setStart] = useState(RECORD_START);
   const [end, setEnd] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [drawMode, setDrawMode] = useState<DrawMode>("none");
   const [state, setState] = useState<State>({ status: "loading", data: null });
 
@@ -57,6 +62,7 @@ export function Explorer() {
             mode,
             start: MONTH_RE.test(start) ? start : RECORD_START,
             ...(MONTH_RE.test(end) ? { end } : {}),
+            ...(MONTH_RE.test(selectedMonth) ? { selectedMonth } : {}),
           }),
           signal: ctrl.signal,
         });
@@ -80,7 +86,7 @@ export function Explorer() {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [aoi, mode, start, end]);
+  }, [aoi, mode, start, end, selectedMonth]);
 
   const onDrawn = useCallback((ring: Ring) => {
     setAoi({ type: "polygon", coordinates: [ring] });
@@ -150,48 +156,105 @@ export function Explorer() {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className="text-lg">Burning calendar: {title}</CardTitle>
+      {data ? (
+        <div
+          className={`flex flex-col gap-6 ${state.status === "loading" ? "opacity-60 transition-opacity" : ""}`}
+        >
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{title}</span>
+            <span>
+              · {formatArea(data.aoi.areaKm2)} · {data.aoi.cells} grid cells (0.1°) · data through{" "}
+              {data.dataThroughDate}
+            </span>
+            {data.modelVersion && <Badge variant="outline">model {data.modelVersion}</Badge>}
             {state.status === "loading" && (
-              <Loader2 className="size-4 animate-spin text-muted-foreground" aria-label="Loading" />
+              <Loader2 className="size-4 animate-spin" aria-label="Loading" />
             )}
-          </div>
-          <CardDescription>
-            Monthly {unitsShort}, one row per year.
-            {data && (
-              <>
-                {" "}
-                Area {formatArea(data.aoi.areaKm2)} · {data.aoi.cells} grid cells (0.1°) · data
-                through {data.dataThroughDate}
-                {data.modelVersion && (
-                  <>
-                    {" "}
-                    · <Badge variant="outline">model {data.modelVersion}</Badge>
-                  </>
-                )}
-              </>
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {data ? (
-            <div className={state.status === "loading" ? "opacity-60 transition-opacity" : ""}>
-              <CalendarHeatmap calendar={data.calendar} unitsShort={unitsShort} title={title} />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Hatched cells are estimates with lower confidence. Hover a cell for its value.
-              </p>
-              <CalendarTable calendar={data.calendar} caption={`${title}: monthly ${unitsShort}`} />
+          </p>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(280px,1fr)_2fr]">
+            <Panel
+              title="This month vs history"
+              description="Selected month against the same month in past years."
+            >
+              <AnomalyCard
+                anomaly={data.anomaly}
+                baseline={data.baseline}
+                unitsShort={unitsShort}
+                mode={mode}
+                dataThrough={data.dataThrough}
+                latestCompleteMonth={data.latestCompleteMonth}
+                onSelectMonth={setSelectedMonth}
+              />
+            </Panel>
+            <Panel
+              title="One record from two sensor families"
+              description="Raw MODIS and raw VIIRS counts cannot be compared; the harmonized record can."
+            >
+              <RawVsHarmonizedChart series={data.series} title={title} />
               <SourceFootnote />
-            </div>
-          ) : state.status === "loading" ? (
-            <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-              Loading 25 years of fire data…
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+            </Panel>
+          </div>
+
+          <Panel
+            title={`Burning calendar`}
+            description={`Monthly ${unitsShort}, one row per year.`}
+          >
+            <CalendarHeatmap calendar={data.calendar} unitsShort={unitsShort} title={title} />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Hatched cells are estimates with lower confidence. Hover a cell for its value.
+            </p>
+            <CalendarTable calendar={data.calendar} caption={`${title}: monthly ${unitsShort}`} />
+            <SourceFootnote />
+          </Panel>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Panel
+              title="Fire season profile"
+              description={`Which months burn: typical year vs ${data.season.selectedYear.year}.`}
+            >
+              <SeasonChart
+                season={data.season}
+                baseline={data.baseline}
+                unitsShort={unitsShort}
+                title={title}
+              />
+              <SourceFootnote />
+            </Panel>
+            <Panel
+              title="Annual totals and trend"
+              description="Which years burned most, and the long-term direction."
+            >
+              <AnnualChart annual={data.annual} unitsShort={unitsShort} title={title} />
+              <SourceFootnote />
+            </Panel>
+          </div>
+        </div>
+      ) : state.status === "loading" ? (
+        <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+          Loading 25 years of fire data…
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function Panel({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }

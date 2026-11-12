@@ -109,6 +109,6 @@ describe("buildPanels", () => {
     expect(y(2000).complete).toBe(false);
     expect(y(2001).complete).toBe(true);
     expect(y(2026).complete).toBe(false);
-    expect(p.annual.trend).toMatchObject({ fromYear: 2001, toYear: 2025 });
+    expect(p.annual.trend).toMatchObject({ fromYear: 2003, toYear: 2025 }); // Terra-only years excluded
   });
 });
