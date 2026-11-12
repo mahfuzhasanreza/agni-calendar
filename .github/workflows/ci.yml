@@ -37,7 +37,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
 
   database:
-    name: Database (migrations, drift, health)
+    name: Database (migrations, drift, sample load, health)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -66,14 +66,41 @@ jobs:
         run: pnpm db:deploy
       - name: Schema drift check (database must match schema.prisma exactly)
         run: pnpm db:drift
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: pipeline/uv.lock
+      - name: Load the committed sample with the real pipeline
+        run: uv run --project pipeline python -m agni all --raw data/sample --kind sample --dataset-version sample
+      - name: Pipeline database tests (load is idempotent, geometry correct)
+        working-directory: pipeline
+        run: uv run pytest -q -m db
+        env:
+          AGNI_TEST_DATABASE_URL: postgresql://agni:agni@localhost:5432/agni
       - run: pnpm build
-      - name: Health endpoint answers with PostGIS
+      - name: Health endpoint reports PostGIS and the loaded model
         run: |
           pnpm start &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health -o health.json && break; sleep 1; done
           cat health.json
-          python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'], r"
+          python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'] and r['data']['activeModel']=='raw-v0', r"
+
+  pipeline:
+    name: Pipeline (ruff, pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: pipeline/uv.lock
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
 
   # Added in later milestones:
-  #   pipeline (M3): ruff + pytest on pipeline/ with data/sample
-  #   e2e (M9): sample load + Playwright smoke tests
+  #   e2e (M9): Playwright smoke tests
