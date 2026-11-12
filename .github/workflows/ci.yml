@@ -37,7 +37,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
 
   database:
-    name: Database (migrations, drift, sample load, health)
+    name: Database + end-to-end (migrations, drift, sample load, API, Playwright)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -101,6 +101,17 @@ jobs:
           curl -sf "http://localhost:3000/api/export/series?preset=chittagong-hill-tracts" -o series.csv
           head -1 series.csv | grep -q '^month,harmonized_viirs_equivalent'
           test "$(wc -l < series.csv)" -gt 300
+      - name: Install Playwright (Chromium)
+        run: pnpm exec playwright install --with-deps chromium
+      - name: End-to-end tests (explorer, toggle, lat/lon, downloads, method page, axe, phone layout)
+        run: pnpm test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   pipeline:
     name: Pipeline (ruff, pytest)
@@ -118,6 +129,3 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest -q
-
-  # Added in later milestones:
-  #   e2e (M9): Playwright smoke tests
