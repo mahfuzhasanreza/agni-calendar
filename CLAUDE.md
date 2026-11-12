@@ -185,6 +185,13 @@ Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, a
 
 Accessible color ramps only: **viridis / cividis** for the heatmap; never red-green. Every chart has a text/table alternative.
 
+**UI implementation notes (M5):**
+- Heatmap colors live in `lib/colors.ts`: 6 viridis classes per mode, trimmed so the faint end contrasts with the surface (light: low = light; dark: low = dark), log-spaced 1-2-5 class breaks because fire counts are very skewed. Validated with the dataviz skill's `validate_palette.js --ordinal` (all checks pass except "single hue", a documented exception for project-mandated viridis). Legends are HTML (they wrap on phones); every chart has a table view and a source footnote.
+- Dark mode follows the OS (`prefers-color-scheme`); shadcn's `.dark` class is not used.
+- shadcn/ui uses the **Base UI** flavour (`@base-ui/react`): `ToggleGroup` values are arrays.
+- MapLibre 6 + Turbopack: the worker is copied to `public/vendor/` on `postinstall` (`scripts/copy-maplibre-worker.mjs`) and set with `setWorkerUrl`; without it the map stays blank ("Worker failed to load"). The map uses `cooperativeGestures` (Ctrl/⌘ + scroll to zoom) so page scrolling works. MapLibre is client-only (`next/dynamic` with `ssr: false`).
+- Drawing uses terra-draw (`rectangle`, `polygon`, idle `static` mode).
+
 ## 7. Architecture
 
 ```

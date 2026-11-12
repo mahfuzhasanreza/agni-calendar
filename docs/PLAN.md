@@ -350,7 +350,7 @@ export const AnalyzeRequest = z.object({
 | M2 | H1–2.5 | ✅ docker-compose, Prisma schema + PostGIS migrations, `/api/health`, migrate in deploy | prod `/api/health` → db ok + PostGIS version |
 | M3 | H1–5 (data) | ✅ ingest → clean → grid → aggregate → load, sample, pytest job | `agni all --sample` fills local DB; full region in prod as `raw-v0` |
 | M4 | H2.5–5 (backend) | ✅ `contracts.ts` + mock JSON (H2.5), `lib/aoi`, `lib/stats`, `/api/regions`, `/api/analyze` | vitest green; CHT analyze < 1.5 s locally |
-| M5 | H2–8 (frontend) | map + AOI inputs + presets, CalendarHeatmap, mode toggle | **MVP-0 on prod ~H8**: CHT → real 25-year calendar |
+| M5 | H2–8 (frontend) | ✅ map + AOI inputs + presets, CalendarHeatmap, mode toggle | **MVP-0 on prod ~H8**: CHT → real 25-year calendar |
 | M6 | H8–13 (data) | zones, reference, 3 models, LOYO, harmonize, load `v1`, `/api/method` | metrics in DB; prod toggle removes the 2012 jump |
 | M7 | H8–13 (FE/BE) | Season, Anomaly, Annual, RawVsHarmonized, DataTables | all panels on prod for 3 presets |
 | M8 | Night | CSV exports (streamed) | open in spreadsheet; counts match SQL |

@@ -38,3 +38,6 @@ next-env.d.ts
 *.pem
 npm-debug.log*
 .pnpm-debug.log*
+
+# generated on install (scripts/copy-maplibre-worker.mjs)
+public/vendor/
