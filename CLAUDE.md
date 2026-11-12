@@ -243,6 +243,8 @@ AOI can be passed as GeoJSON polygon, bbox, or `lat,lon,radius_km`, or a preset 
 
 Performance target: any AOI query **< 1.5 s** on the deployed app.
 
+**Implemented (M4):** `GET /api/regions`, `POST /api/analyze`, `GET /api/analyze?preset=` (CDN-cacheable). Presets are **approximate bounding boxes in `lib/regions.ts`** (the `region` table is unused for now). The anomaly defaults to the **latest complete month** (`ingest_run.data_to` stores the real last detection date). The selected month is compared with the same calendar month in the baseline years **excluding its own year**. Measured on the full data (local): CHT ≈ 0.1 s, whole region ≈ 1.2 s. SQL rule: the per-cell weight CTE must be `MATERIALIZED`, otherwise Postgres inlines it and recomputes the spatial weight for every cell-month row (28 s instead of 1 s).
+
 ## 8. CI/CD (GitHub Actions)
 
 - **`ci.yml`** — on every pull request and push:

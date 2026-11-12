@@ -84,6 +84,14 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health -o health.json && break; sleep 1; done
           cat health.json
           python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'] and r['data']['activeModel']=='raw-v0', r"
+      - name: Analyze API on the sample (CHT preset, circle, invalid AOI)
+        run: |
+          curl -sf "http://localhost:3000/api/analyze?preset=chittagong-hill-tracts" -o cht.json
+          python3 -c "import json; r=json.load(open('cht.json')); assert len(r['series'])>300 and sum(p['value'] for p in r['series'])>0 and r['anomaly']['label'], r.get('error')"
+          code=$(curl -s -o circle.json -w "%{http_code}" -X POST http://localhost:3000/api/analyze -H 'content-type: application/json' -d '{"aoi":{"type":"circle","lat":22.0,"lon":89.2,"radiusKm":20}}')
+          test "$code" = "200"
+          code=$(curl -s -o bad.json -w "%{http_code}" -X POST http://localhost:3000/api/analyze -H 'content-type: application/json' -d '{"aoi":{"type":"bbox","bbox":[-64.5,-31.5,-64,-31]}}')
+          test "$code" = "400"
 
   pipeline:
     name: Pipeline (ruff, pytest)

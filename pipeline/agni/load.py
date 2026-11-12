@@ -71,6 +71,8 @@ def load_all(
     model_run: dict,
     kind: str,
     rows_in: int,
+    data_from: str,
+    data_to: str,
     cfg: Config = DEFAULT,
 ) -> dict:
     """Replace cells, cell_month and activate model_run. Returns a small summary."""
@@ -141,8 +143,8 @@ def load_all(
             run_id,
             "success",
             rows_loaded=len(cell_month),
-            data_from=months.min().date(),
-            data_to=months.max().date(),
+            data_from=data_from,  # first / last detection date (YYYY-MM-DD)
+            data_to=data_to,
             message=json.dumps(summary),
         )
         return summary
