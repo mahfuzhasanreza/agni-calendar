@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+coverage/
+pnpm-lock.yaml
+next-env.d.ts
+lib/generated/
+data/
+pipeline/
+playwright-report/
+test-results/
+# Hand-written docs keep their own formatting
+CLAUDE.md
+AGENTS.md
+docs/

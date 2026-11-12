@@ -249,7 +249,7 @@ Stages write Parquet to `data/interim/` so each step re-runs independently.
 
 ---
 
-## 5. API (Node runtime, `force-dynamic`, explicit `maxDuration`)
+## 5. API (Node runtime, explicit `maxDuration`; no `dynamic` export: removed under Next 16 `cacheComponents`, handlers are uncached by default)
 
 ```ts
 // lib/contracts.ts (shape; exact code in M4)
@@ -346,7 +346,7 @@ export const AnalyzeRequest = z.object({
 | # | When | Milestone | Done when |
 |---|---|---|---|
 | M0 | Thu/Fri (no code) | FIRMS archive request, MAP_KEY, GitHub repo (`main`), Vercel project, DB with PostGIS | requests confirmed; accounts exist |
-| M1 | Sat H0–1 | Scaffold Next.js/TS/Tailwind/shadcn, ESLint/Prettier/Vitest, `ci.yml` (web job), `deploy.yml`, hello page | public URL live; CI green on `main` |
+| M1 | Sat H0–1 | ✅ Scaffold Next.js 16.4/TS/Tailwind v4 (shadcn moved to M5), ESLint/Prettier/Vitest, `ci.yml` (web job), `deploy.yml`, hello page | public URL live; CI green on `main` |
 | M2 | H1–2.5 | docker-compose, Prisma schema + PostGIS migrations, `/api/health`, migrate in deploy | prod `/api/health` → db ok + PostGIS version |
 | M3 | H1–5 (data) | ingest → clean → grid → aggregate → load, sample, pytest job | `agni all --sample` fills local DB; full region in prod as `raw-v0` |
 | M4 | H2.5–5 (backend) | `contracts.ts` + mock JSON (H2.5), `lib/aoi`, `lib/stats`, `/api/regions`, `/api/analyze` | vitest green; CHT analyze < 1.5 s locally |

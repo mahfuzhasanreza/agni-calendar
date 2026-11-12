@@ -169,9 +169,9 @@ Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, a
 |---|---|
 | Language | TypeScript (strict) for app, Python 3.12 for pipeline |
 | Web app | **Next.js** (latest stable, App Router) for UI + API |
-| Backend runtime | **Node.js** (LTS). All API Route Handlers run on the Node.js runtime (`export const runtime = "nodejs"`), not Edge, because Prisma, PostGIS queries and streamed CSV exports need it. Small Node.js (TypeScript) scripts in `/scripts` for seeding, health checks and NRT ingestion helpers |
+| Backend runtime | **Node.js 26** (`.nvmrc`, Vercel `26.x`). **Next.js 16.4** with `cacheComponents` on: `export const dynamic` / `revalidate` are **removed** (route handlers are uncached by default; caching is opt-in via `use cache`). All API Route Handlers run on the Node.js runtime (`export const runtime = "nodejs"`, the default; Edge is deprecated) plus an explicit `maxDuration`, not Edge, because Prisma, PostGIS queries and streamed CSV exports need it. Small Node.js (TypeScript) scripts in `/scripts` for seeding, health checks and NRT ingestion helpers |
 | ORM / DB | **Prisma** + **PostgreSQL** with **PostGIS** (spatial queries via `$queryRaw`) |
-| Styling | **TailwindCSS** (+ shadcn/ui components) |
+| Styling | **TailwindCSS** (v4) + shadcn/ui components (initialised in M5, when the first UI components are needed) |
 | Map | MapLibre GL JS + a draw plugin (polygon / rectangle) with free basemap tiles |
 | Charts | Apache ECharts (calendar heatmap, bands, bars) |
 | Validation | Zod for API inputs |
