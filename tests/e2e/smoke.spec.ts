@@ -55,6 +55,17 @@ test("explorer: lat/lon + radius area", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("shareable link restores area, mode and month", async ({ page }) => {
+  await page.goto("/?preset=sundarbans&mode=raw&month=2020-03");
+  await waitForAnalysis(page);
+  await expect(page.getByText("Sundarbans (Bangladesh and India)").first()).toBeVisible();
+  await expect(page.getByText("Monthly hotspots (raw), one row per year.")).toBeVisible();
+  await expect(page.getByLabel("Month to compare")).toHaveValue("2020-03");
+  // Changing the view updates the address bar.
+  await page.getByRole("button", { name: "Harmonized", exact: true }).click();
+  await expect(page).toHaveURL(/preset=sundarbans&month=2020-03$/);
+});
+
 test("exports: monthly series CSV downloads with the expected columns", async ({ page }) => {
   await page.goto("/");
   await waitForAnalysis(page);

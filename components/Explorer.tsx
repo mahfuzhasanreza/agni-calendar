@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Link2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,12 @@ import type { Aoi, AnalyzeResponse, ApiError } from "@/lib/contracts";
 import { formatArea } from "@/lib/format";
 import { MONTH_RE } from "@/lib/months";
 import { RECORD_START } from "@/lib/sensors";
+import {
+  analyzeGetUrl,
+  fromSearchParams,
+  toSearchParams,
+  type ExplorerState,
+} from "@/lib/url-state";
 
 // MapLibre needs the browser (WebGL), so the map is never server-rendered.
 const MapView = dynamic(() => import("@/components/map/MapView"), {
@@ -41,13 +47,44 @@ type State =
   | { status: "error"; data: AnalyzeResponse | null; error: string };
 
 export function Explorer() {
-  const [aoi, setAoi] = useState<Aoi>({ type: "preset", slug: "chittagong-hill-tracts" });
-  const [mode, setMode] = useState<Mode>("harmonized");
-  const [start, setStart] = useState(RECORD_START);
-  const [end, setEnd] = useState<string>("");
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  // Rendered in the browser only (see ExplorerClient), so a shared link's URL is the
+  // initial state.
+  const [initial] = useState(() => fromSearchParams(new URLSearchParams(window.location.search)));
+  const [aoi, setAoi] = useState<Aoi>(initial.aoi);
+  const [mode, setMode] = useState<Mode>(initial.mode);
+  const [start, setStart] = useState(initial.start);
+  const [end, setEnd] = useState<string>(initial.end);
+  const [selectedMonth, setSelectedMonth] = useState<string>(initial.month);
   const [drawMode, setDrawMode] = useState<DrawMode>("none");
   const [state, setState] = useState<State>({ status: "loading", data: null });
+  const [copied, setCopied] = useState(false);
+
+  const query = useMemo<ExplorerState>(
+    () => ({
+      aoi,
+      mode,
+      start: MONTH_RE.test(start) ? start : RECORD_START,
+      end: MONTH_RE.test(end) ? end : "",
+      month: MONTH_RE.test(selectedMonth) ? selectedMonth : "",
+    }),
+    [aoi, mode, start, end, selectedMonth],
+  );
+
+  // Keep the address bar in sync so the current view can be shared.
+  useEffect(() => {
+    const qs = toSearchParams(query).toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }, [query]);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   // Fetch whenever the query changes (debounced; stale requests are aborted).
   useEffect(() => {
@@ -55,18 +92,22 @@ export function Explorer() {
     const timer = setTimeout(async () => {
       setState((s) => ({ status: "loading", data: s.data }));
       try {
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            aoi,
-            mode,
-            start: MONTH_RE.test(start) ? start : RECORD_START,
-            ...(MONTH_RE.test(end) ? { end } : {}),
-            ...(MONTH_RE.test(selectedMonth) ? { selectedMonth } : {}),
-          }),
-          signal: ctrl.signal,
-        });
+        // Presets use the CDN-cacheable GET; drawn areas, circles and boxes use POST.
+        const getUrl = analyzeGetUrl(query);
+        const res = getUrl
+          ? await fetch(getUrl, { signal: ctrl.signal })
+          : await fetch("/api/analyze", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                aoi: query.aoi,
+                mode: query.mode,
+                start: query.start,
+                ...(query.end ? { end: query.end } : {}),
+                ...(query.month ? { selectedMonth: query.month } : {}),
+              }),
+              signal: ctrl.signal,
+            });
         const body = (await res.json()) as AnalyzeResponse | ApiError;
         if (!res.ok || "error" in body) {
           const err = body as ApiError;
@@ -87,7 +128,7 @@ export function Explorer() {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [aoi, mode, start, end, selectedMonth]);
+  }, [query]);
 
   const onDrawn = useCallback((ring: Ring) => {
     setAoi({ type: "polygon", coordinates: [ring] });
@@ -168,6 +209,14 @@ export function Explorer() {
               {data.dataThroughDate}
             </span>
             {data.modelVersion && <Badge variant="outline">model {data.modelVersion}</Badge>}
+            <button
+              type="button"
+              onClick={copyLink}
+              className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs hover:bg-accent"
+            >
+              <Link2 className="size-3.5" aria-hidden />
+              {copied ? "Link copied" : "Copy link to this view"}
+            </button>
             {state.status === "loading" && (
               <Loader2 className="size-4 animate-spin" aria-label="Loading" />
             )}

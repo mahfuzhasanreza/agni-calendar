@@ -75,6 +75,11 @@ def test_load_into_postgis_is_idempotent(built):
         zoned = conn.execute(
             "SELECT count(*) FROM cell WHERE ever_active AND zone_id IS NOT NULL"
         ).fetchone()[0]
+        tile_ok = conn.execute(
+            "SELECT abs((SELECT sum(harm::float8) FROM tile_month)"
+            " - (SELECT sum(harm::float8) FROM cell_month)) < 1"
+        ).fetchone()[0]
+        untiled = conn.execute("SELECT count(*) FROM cell WHERE tile_id IS NULL").fetchone()[0]
         flags = dict(
             conn.execute("SELECT source_flag, count(*) FROM cell_month GROUP BY 1").fetchall()
         )
@@ -91,4 +96,5 @@ def test_load_into_postgis_is_idempotent(built):
     assert n_zones == 4 and n_cal > 0
     assert zoned == n_active
     assert {"calibrated", "observed", "terra_only_calibrated"} <= set(flags)
+    assert tile_ok and untiled == 0  # the 1° tile rollup matches the cell table
     assert [round(v, 6) for v in bbox] == [92.2, 22.6, 92.3, 22.7]

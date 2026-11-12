@@ -71,6 +71,7 @@ A web app that turns 25 years of MODIS + VIIRS hotspots into a **single, sensor-
 
 ### 3.3 Stretch features (only after MVP is green and deployed)
 
+- ~~Shareable link~~ **done in M10**: `?preset=…|aoi=<json>&mode=&start=&end=&month=` (lib/url-state.ts), "Copy link to this view" button; the explorer is client-only (`components/ExplorerClient.tsx`).
 - **Near-real-time:** nightly scheduled ingestion of the latest VIIRS NRT data via the FIRMS API, so "this month" is live.
 - **Anomaly watchlist:** top cells in the region currently burning above their historical P90.
 - **Shareable link:** AOI + date range encoded in the URL.
@@ -251,6 +252,8 @@ AOI can be passed as GeoJSON polygon, bbox, or `lat,lon,radius_km`, or a preset 
 - `GET /api/health` – DB connectivity + latest ingest date.
 
 Performance target: any AOI query **< 1.5 s** on the deployed app.
+
+**Performance (M10):** a 1° tile rollup (`tile`, `tile_month`, `cell.tile_id`; rebuilt by the loader in the same transaction) lets fully covered tiles read 313 pre-summed rows instead of ~30,000 cell-months; only boundary tiles go cell by cell (their cells are picked by `tile_id`, with the intersection test inside the weight; a GiST probe per tile was 20× slower). Results are identical to the cell path (max diff 0.02 from float32). Local: whole region 0.90 → 0.02 s, large polygon 0.37 → 0.13 s, presets ≈ 0.05 s. The UI requests presets with the CDN-cacheable GET, and deploy.yml warms those URLs after each deploy. **Schema changes that new code depends on must be migrated + loaded in production before merging** (additive migrations are safe for the running code).
 
 **Implemented (M4):** `GET /api/regions`, `POST /api/analyze`, `GET /api/analyze?preset=` (CDN-cacheable). Presets are **approximate bounding boxes in `lib/regions.ts`** (the `region` table is unused for now). The anomaly defaults to the **latest complete month** (`ingest_run.data_to` stores the real last detection date). The selected month is compared with the same calendar month in the baseline years **excluding its own year**. Measured on the full data (local): CHT ≈ 0.1 s, whole region ≈ 1.2 s. SQL rule: the per-cell weight CTE must be `MATERIALIZED`, otherwise Postgres inlines it and recomputes the spatial weight for every cell-month row (28 s instead of 1 s).
 

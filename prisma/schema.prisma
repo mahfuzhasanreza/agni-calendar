@@ -57,9 +57,39 @@ model Cell {
   zoneId     Int?                                  @map("zone_id")
   zone       Zone?                                 @relation(fields: [zoneId], references: [id])
   everActive Boolean                               @default(false) @map("ever_active")
+  /// 1° tile containing the cell: floor(lat) * 1000 + floor(lon) of the cell center.
+  tileId     Int?                                  @map("tile_id")
 
   @@index([geom], type: Gist)
+  @@index([tileId])
   @@map("cell")
+}
+
+/// 1° tile (rollup unit for fast queries over large areas).
+model Tile {
+  id   Int                                   @id // floor(lat) * 1000 + floor(lon) of the SW corner
+  geom Unsupported("geometry(Polygon,4326)")
+
+  @@index([geom], type: Gist)
+  @@map("tile")
+}
+
+/// cell_month summed per 1° tile and month (ever-active cells only). Rebuilt on every load.
+model TileMonth {
+  tileId       Int      @map("tile_id")
+  month        DateTime @db.Date
+  detModisT    Float    @map("det_modis_t") @db.Real
+  detModisA    Float    @map("det_modis_a") @db.Real
+  detViirsSnpp Float    @map("det_viirs_snpp") @db.Real
+  detViirsN20  Float    @map("det_viirs_n20") @db.Real
+  harm         Float    @db.Real
+  harmLo       Float    @map("harm_lo") @db.Real
+  harmHi       Float    @map("harm_hi") @db.Real
+  /// Highest "least observed" rank among the tile's cells this month (see lib/sql/analyze.ts).
+  flagRank     Int      @map("flag_rank") @db.SmallInt
+
+  @@id([tileId, month])
+  @@map("tile_month")
 }
 
 /// One row per ever-active cell per month, for the ACTIVE model version only (dense).
