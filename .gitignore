@@ -29,3 +29,11 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# next / misc (from create-next-app)
+next-env.d.ts
+.pnp
+.pnp.*
+*.pem
+npm-debug.log*
+.pnpm-debug.log*

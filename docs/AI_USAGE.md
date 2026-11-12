@@ -10,3 +10,4 @@ All scientific choices (harmonization method, validation design, thresholds) are
 |---|---|---|---|
 | 2026-11-12 | Implementation plan (`docs/PLAN.md`) and updates to `CLAUDE.md` | Drafted the plan, flagged risks in the original spec (zero handling, MODIS orbital drift, storage limits, NRT `type` field) | Wrote the product spec; reviewed and approved the plan |
 | 2026-11-12 | Data profiling of the FIRMS download; free-tier architecture | Profiled headers, counts and date ranges; found the S-NPP end date and header differences; redesigned storage to fit free tiers | Downloaded the data; chose the free-tier option |
+| 2026-11-12 | M1 scaffold: Next.js 16.4, lint/format/test tooling, CI and deploy workflows | Generated the scaffold and config, read the bundled Next 16 docs (found `dynamic` removed under cacheComponents), wrote workflows, ran all checks locally | Approved starting M1; provided accounts |
