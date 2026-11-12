@@ -26,6 +26,18 @@ Checks (the same ones CI runs):
 pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build
 ```
 
+## Data pipeline
+
+Requires [uv](https://docs.astral.sh/uv/). From the repo root:
+
+```bash
+pnpm db:up                                              # local PostGIS
+pnpm db:deploy                                          # apply migrations
+uv run --project pipeline python -m agni all            # data/raw → parquet, tiles, local DB (~1 min)
+uv run --project pipeline python -m agni all --raw data/sample --kind sample   # quick run on the sample
+cd pipeline && uv run pytest                            # tests (set AGNI_TEST_DATABASE_URL for DB tests)
+```
+
 ## Data
 
 NASA FIRMS archive downloads (MODIS C6.1, VIIRS S-NPP and NOAA-20, bbox 86,20,97,28) go in `data/raw/` (git-ignored). Details: `CLAUDE.md` §4.

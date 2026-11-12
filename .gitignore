@@ -6,6 +6,7 @@
 # data (raw downloads and intermediate files are never committed)
 data/raw/
 data/interim/
+data/tiles/
 
 # node / next
 node_modules/

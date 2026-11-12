@@ -161,6 +161,8 @@ The method must be simple enough to explain in 60 seconds, documented in `docs/M
 - **VIIRS reference continuity:** S-NPP data ends 2026-11-01. NOAA-20 is calibrated onto S-NPP (2018-04 → 2026-07 overlap, same code + LOYO) and fills S-NPP gaps from 2018 and all months after S-NPP's end (`n20_calibrated`). Demo line: the method survives *two* sensor handovers.
 - **Headline metric:** both detections and fire-days are calibrated and validated; the DB serves one (detections unless fire-days validates clearly better).
 
+**Pipeline facts (M3, measured on the full download):** 6.58 M raw rows → 5.94 M vegetation-fire detections (5.24 M pass the confidence filter) → 7,434 ever-active cells → 2.33 M dense cell-months; 84 detection tiles = 96 MB; database = **227 MB**; whole-region monthly query ≈ 100 ms. Full build + load ≈ 65 s with a **1.6 GB** peak (the dev machine has ~2.5 GB free; keep text columns categorical, never per-row Python strings). Commands: `uv run --project pipeline python -m agni {sample,build,load,all}`. Until M6, the active model is `raw-v0` (naive sensor stitching; it deliberately shows the 2012 jump). pandas is 3.x: categorical CSV columns are inferred as numbers when numeric (relabel to strings).
+
 Pipeline is written in **Python** (pandas/numpy/scipy, pytest) in `pipeline/`, and writes results to Postgres. The web app never recomputes calibration; it only aggregates cell-month rows inside the AOI.
 
 ## 6. Tech stack
