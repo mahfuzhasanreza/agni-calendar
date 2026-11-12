@@ -87,7 +87,17 @@ def load(interim: Path, database_url: str, kind: str) -> dict:
         "cv_predictions": {},
         "notes": "Placeholder: raw sensors stitched without calibration (shows the 2012 jump).",
     }
-    summary = load_all(database_url, cells, cm, model_run, kind, meta["rows_in"], DEFAULT)
+    summary = load_all(
+        database_url,
+        cells,
+        cm,
+        model_run,
+        kind,
+        meta["rows_in"],
+        meta["date_min"],
+        meta["date_max"],
+        DEFAULT,
+    )
     _log(f"loaded {summary}", t0)
     return summary
 
