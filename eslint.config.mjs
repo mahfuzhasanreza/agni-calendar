@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
     "lib/generated/**",
     "data/**",
     "pipeline/**",
+    "public/vendor/**",
   ]),
 ]);
 
