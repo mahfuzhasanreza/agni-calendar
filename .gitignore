@@ -1,0 +1,31 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# data (raw downloads and intermediate files are never committed)
+data/raw/
+data/interim/
+
+# node / next
+node_modules/
+.next/
+out/
+coverage/
+lib/generated/
+*.tsbuildinfo
+.vercel/
+playwright-report/
+test-results/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# os / editors
+.DS_Store
+.idea/
+.vscode/
