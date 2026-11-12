@@ -219,7 +219,7 @@ docker-compose.yml
 
 ### 7.2 Data model (final schema: `docs/PLAN.md` §3)
 
-- **No `Detection` table** (free tier: 5.94 M rows ≈ 1 GB would not fit Neon's 512 MB). Raw `type=0` detections (archive + NRT, all confidence levels) are written by the pipeline as **1°×1° gzip CSV tiles + `manifest.json`** and published as a GitHub Release `data-vN`. Only the detections export reads them (`TILES_BASE_URL`).
+- **No `Detection` table** (free tier: 5.94 M rows ≈ 1 GB would not fit comfortably in Neon's free 1 GB). Raw `type=0` detections (archive + NRT, all confidence levels) are written by the pipeline as **1°×1° gzip CSV tiles + `manifest.json`** and published as a GitHub Release `data-vN`. Only the detections export reads them (`TILES_BASE_URL`).
 - `Cell` – deterministic id (row*10000+col), res, center lat/lon, `geom` polygon (GiST), zone_id, ever_active.
 - `Zone` – calibration strata (MVP: long-term MODIS activity strata).
 - `CellMonth` – PK (cell_id, month); holds **only the active model version** (~2.35 M rows, ~250 MB). SmallInt raw counts (MODIS T/A, VIIRS S-NPP/N20), modis_ref, harmonized value/low/high for the **headline metric**, source_flag (observed / observed_nrt / calibrated / terra_only_calibrated / n20_calibrated / gap_filled). **Dense** for every ever-active cell (harmonized MODIS=0 is not 0).
@@ -249,9 +249,9 @@ Performance target: any AOI query **< 1.5 s** on the deployed app.
   3. Unit tests (Vitest) with coverage.
   4. Python: Ruff + pytest on `pipeline/` using `data/sample`.
   5. Integration/e2e: start a **PostGIS service container**, run `prisma migrate deploy`, seed sample data, `next build`, run Playwright smoke tests (draw AOI → calendar renders → CSV downloads).
-- **`deploy.yml`** — on push to `main` (after CI passes, via `workflow_run`): run `prisma migrate deploy` against production DB, deploy to Vercel production with the Vercel CLI (`vercel.json` disables Vercel's own Git deploys). PRs get Vercel **preview deployments** with the URL commented on the PR; previews use a **read-only DB role** and never run migrations.
+- **`deploy.yml`** — on push to `main` (after CI passes, via `workflow_run`): run `prisma migrate deploy` against production DB, deploy to Vercel production with the Vercel CLI (`vercel.json` disables Vercel's own Git deploys). PRs get Vercel **preview deployments** with the URL commented on the PR; previews use their **own Neon database branch** (Vercel–Neon integration, Preview only) and never run migrations against production.
 - **`ingest-nrt.yml`** (stretch) — scheduled nightly + manual trigger: fetch latest VIIRS NRT for the region via FIRMS API, append detections, recompute affected cell-months, log an `IngestRun`.
-- Secrets: `DATABASE_URL`, `DIRECT_URL`, `DATABASE_URL_READONLY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `FIRMS_MAP_KEY`, `REVALIDATE_SECRET`, `TILES_TOKEN` (only while the repo is private). Env: `TILES_BASE_URL`.
+- Secrets: `DATABASE_URL`, `DIRECT_URL`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `FIRMS_MAP_KEY`, `REVALIDATE_SECRET`. Env: `TILES_BASE_URL`.
 - Branch protection on `main`: CI must pass; small PRs per feature so the team can work in parallel.
 
 ## 9. Engineering rules for Claude Code

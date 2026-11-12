@@ -24,10 +24,10 @@
 | d | Terra/Aqua orbital drift in recent years | Calibration window chosen by diagnostics (likely 2012–2019/2021); report per-year parameter stability |
 | e | NRT has no `type` field | Static-source mask from cells with persistent archive `type=2` |
 | f | Archive lags by months; "this month" isn't current | One-off FIRMS API backfill of recent months in MVP, flagged `observed_nrt` (provisional); nightly job stays stretch |
-| g | Volume: 5.94 M `type=0` detections ≈ 1 GB in Postgres > free tiers (~0.5 GB) | **Free-tier design (decided 2026-11-12):** raw detections are **not stored in Postgres**. They live as gzip CSV tiles (1°×1°) in a GitHub Release (`data-vN`), read only by the detections export. Postgres (Neon free) holds aggregates only (~250 MB) |
+| g | Volume: 5.94 M `type=0` detections ≈ 1 GB in Postgres > free tiers (Neon free: 1 GB) | **Free-tier design (decided 2026-11-12):** raw detections are **not stored in Postgres**. They live as gzip CSV tiles (1°×1°) in a GitHub Release (`data-vN`), read only by the detections export. Postgres (Neon free) holds aggregates only (~250 MB) |
 | r | S-NPP data stops 2026-11-01 (verified in download) | VIIRS reference = S-NPP; after its end (and for S-NPP gaps from 2018) use **NOAA-20 calibrated onto S-NPP** over the 2018–2026 overlap (`n20_calibrated`). Same calibration code as MODIS→S-NPP |
 | h | 4 stats endpoints = 4 identical AOI scans | Single `POST /api/analyze` returns series + calendar + season + anomaly + annual; exports separate |
-| i | PR previews against prod DB | Previews use a read-only role (or Neon branch); migrations only from `main` |
+| i | PR previews against prod DB | Previews get their own Neon branch (Vercel–Neon integration); migrations only from `main` |
 | j | Date range vs baseline ambiguity | Date range filters display only; baseline fixed (default 2003–2022) |
 | k | Partially covered cells | Area-fraction weighting; exports use exact point-in-polygon; documented |
 | l | Summing cell P10/P90 | Shown as a "conservative envelope" |
@@ -209,7 +209,7 @@ model IngestRun {
 | Cell (0.1°) | 8,800 (7,512 ever active) | < 5 MB | Neon |
 | CellMonth (active version, dense) | ~2.35 M | ~230–260 MB incl. PK | Neon |
 | ModelRun / CalibrationModel / Region / Zone / IngestRun | small | < 10 MB | Neon |
-| **Neon total** | | **~250–280 MB of 512 MB free** | |
+| **Neon total** | | **~250–280 MB of 1 GB free** | |
 | Raw detections (`type=0`, archive + NRT): MODIS 1.04 M, S-NPP 3.18 M, NOAA-20 1.73 M | 5.94 M | ~100–150 MB gzip | GitHub Release tiles |
 
 If Neon gets tight: drop `det_viirs_n20` from the DB (it's in the tiles), or store months where every count is 0 sparsely and add the per-stratum "MODIS=0" value at query time.
@@ -290,7 +290,7 @@ export const AnalyzeRequest = z.object({
 
 **Performance:** whole region ≈ 1.5 M index rows — target < 1 s warm. Mitigations in order: covering index → CDN cache on presets → max AOI ~150k km² → 0.5° rollup. Vercel + DB co-located (Singapore).
 
-**Detections export (tile-based):** compute the 1° tiles that intersect the AOI bbox (`manifest.json`, cached) → fetch each `tile.csv.gz` from `TILES_BASE_URL` (a GitHub Release URL in prod, `file://data/tiles` locally/CI; optional `TILES_TOKEN` if the repo is private) → stream-gunzip (Node `zlib`) → filter by date range and exact point-in-polygon (small tested ray-casting function in `lib/geo.ts`, no new dependency) → stream CSV to the client. Tiles average ~1–2 MB, so a typical AOI reads a handful. Cap ~500k rows with a clear message. Verify Vercel duration/response limits.
+**Detections export (tile-based):** compute the 1° tiles that intersect the AOI bbox (`manifest.json`, cached) → fetch each `tile.csv.gz` from `TILES_BASE_URL` (a GitHub Release URL in prod, `file://data/tiles` locally/CI) → stream-gunzip (Node `zlib`) → filter by date range and exact point-in-polygon (small tested ray-casting function in `lib/geo.ts`, no new dependency) → stream CSV to the client. Tiles average ~1–2 MB, so a typical AOI reads a handful. Cap ~500k rows with a clear message. Verify Vercel duration/response limits.
 
 ---
 
@@ -317,18 +317,18 @@ export const AnalyzeRequest = z.object({
 **`ci.yml`** (PR + push to `main`; cancel in-progress)
 - `web`: pnpm cache → install → eslint → prettier --check → `tsc --noEmit` → `prisma validate` → `prisma generate` → vitest --coverage.
 - `pipeline`: setup-uv → ruff check → ruff format --check → pytest.
-- `e2e` (needs both): service `postgis/postgis:17-3.5` → `prisma migrate deploy` → drift check → `uv run python -m agni all --sample` → seed regions → `next build` → Playwright (chromium) → upload report on failure. No secrets.
+- `e2e` (needs both): service `postgis/postgis:18-3.6` → `prisma migrate deploy` → drift check → `uv run python -m agni all --sample` → seed regions → `next build` → Playwright (chromium) → upload report on failure. No secrets.
 
 **`deploy.yml`**
 - prod: `workflow_run` of CI succeeded on `main` → environment `production` → `prisma migrate deploy` (DIRECT_URL) → `vercel pull/build --prod/deploy --prebuilt --prod` → smoke `/api/health`.
-- preview: `pull_request` (non-fork) → `vercel deploy` with read-only DB → sticky PR comment with URL.
+- preview: `pull_request` (non-fork) → `vercel deploy` (its own Neon branch via the Vercel–Neon integration) → sticky PR comment with URL.
 - `vercel.json`: `git.deploymentEnabled: false`, `regions: ["sin1"]`.
 
 **`ingest-nrt.yml`** (stretch): cron `30 20 * * *` (02:30 Dhaka) + dispatch → `agni nrt --days 3` (fetch, static mask, upsert `source=nrt`, recompute affected cell-months, `IngestRun`) → revalidate webhook. Archive data replaces NRT rows when available.
 
-**Secrets:** `DATABASE_URL`, `DIRECT_URL`, `DATABASE_URL_READONLY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `FIRMS_MAP_KEY`, `REVALIDATE_SECRET`, `TILES_TOKEN` (only while the repo is private). Env (not secret): `TILES_BASE_URL`.
+**Secrets:** `DATABASE_URL`, `DIRECT_URL`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `FIRMS_MAP_KEY`, `REVALIDATE_SECRET`. Env (not secret): `TILES_BASE_URL`.
 
-**Hosting (free tier):** Vercel Hobby + Neon free (Singapore, 512 MB, scales to zero → first query after idle has a cold start of up to ~1 s; ping `/api/health` before demos) + GitHub Release for detection tiles. In e2e CI, the pipeline writes sample tiles to `data/tiles/` and `TILES_BASE_URL=file://…`.
+**Hosting (free tier):** Vercel Hobby + Neon free (Singapore, 1 GB, Postgres 18.6 + PostGIS 3.6.4, scales to zero → first query after idle has a cold start of up to ~1 s; ping `/api/health` before demos) + GitHub Release for detection tiles. In e2e CI, the pipeline writes sample tiles to `data/tiles/` and `TILES_BASE_URL=file://…`.
 
 ---
 
@@ -380,7 +380,7 @@ Schema changes only via Backend; contract changes reviewed by FE + BE; PRs < 400
 | Risk | Fallback |
 |---|---|
 | Archive email late | FIRMS yearly per-country CSV downloads (verify); smaller bbox (CHT + Mizoram); API for recent months |
-| Neon free 512 MB fills up | drop `det_viirs_n20` from DB; sparse all-zero months; 0.25° grid (≈6× fewer rows) |
+| Neon free 1 GB fills up | drop `det_viirs_n20` from DB; sparse all-zero months; 0.25° grid (≈6× fewer rows) |
 | GitHub Release download slow/blocked from Vercel | move tiles to Vercel Blob (same tile format, only `TILES_BASE_URL` changes) |
 | Neon cold start breaks the 1.5 s target | ping `/api/health` before demos; preset responses CDN-cached |
 | Slow AOI queries | covering index → preset CDN cache → AOI cap → 0.5° rollup → 0.25° grid |
