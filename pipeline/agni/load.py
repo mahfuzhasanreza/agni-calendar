@@ -73,29 +73,45 @@ def load_all(
     rows_in: int,
     data_from: str,
     data_to: str,
+    zones: list[dict] | None = None,
+    calibration_rows: list[dict] | None = None,
     cfg: Config = DEFAULT,
 ) -> dict:
-    """Replace cells, cell_month and activate model_run. Returns a small summary."""
+    """Replace zones, cells, cell_month and activate model_run (+ its calibration rows).
+
+    `cells` may carry a zone_id column (calibrated models); NULL otherwise.
+    """
     run_id = _start_run(conninfo, kind, rows_in)
     try:
         months = pd.to_datetime(cell_month["month"])
         cm = cell_month.assign(month=months.dt.strftime("%Y-%m-%d"))
+        if "zone_id" not in cells:
+            cells = cells.assign(zone_id=pd.NA)
+        cells = cells.assign(zone_id=cells["zone_id"].astype("Int16"))
         with psycopg.connect(conninfo) as conn, conn.cursor() as cur:
             cur.execute(
                 """CREATE TEMP TABLE stage_cell (
                      id int, "row" smallint, col smallint, res real,
-                     center_lat real, center_lon real, ever_active boolean
+                     center_lat real, center_lon real, ever_active boolean, zone_id int
                    ) ON COMMIT DROP"""
             )
             _copy(
                 cur,
                 "stage_cell",
-                ["id", "row", "col", "res", "center_lat", "center_lon", "ever_active"],
+                ["id", "row", "col", "res", "center_lat", "center_lon", "ever_active", "zone_id"],
                 cells,
             )
             cur.execute("DELETE FROM cell")
+            cur.execute("DELETE FROM zone")
+            for z in zones or []:
+                cur.execute(
+                    "INSERT INTO zone (id, name, description) "
+                    "VALUES (%(id)s, %(name)s, %(description)s)",
+                    z,
+                )
             cur.execute(
-                """INSERT INTO cell (id, "row", col, res, center_lat, center_lon, geom, ever_active)
+                """INSERT INTO cell
+                     (id, "row", col, res, center_lat, center_lon, geom, ever_active, zone_id)
                    SELECT id, "row", col, res, center_lat, center_lon,
                           ST_MakeEnvelope(
                             round((%(w)s + col * %(r)s)::numeric, 6)::float8,
@@ -103,7 +119,7 @@ def load_all(
                             round((%(w)s + (col + 1) * %(r)s)::numeric, 6)::float8,
                             round((%(s)s + ("row" + 1) * %(r)s)::numeric, 6)::float8,
                             4326),
-                          ever_active
+                          ever_active, zone_id
                    FROM stage_cell""",
                 {"w": cfg.west, "s": cfg.south, "r": cfg.grid_res},
             )
@@ -126,6 +142,18 @@ def load_all(
                     "notes": model_run.get("notes"),
                 },
             )
+            for row in calibration_rows or []:
+                cur.execute(
+                    """INSERT INTO calibration_model
+                         (model_version, metric, zone_id, season, method, params, metrics)
+                       VALUES (%(model_version)s, %(metric)s, %(zone_id)s, %(season)s, %(method)s,
+                         %(params)s, %(metrics)s)""",
+                    {
+                        **row,
+                        "params": json.dumps(row["params"]),
+                        "metrics": json.dumps(row.get("metrics", {})),
+                    },
+                )
             # Exactly one active model.
             cur.execute("UPDATE model_run SET is_active = (model_version = %s)", (version,))
             cur.execute("ANALYZE cell")

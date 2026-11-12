@@ -1,9 +1,10 @@
-"""Command line: python -m agni {build,load,all,sample}.
+"""Command line: python -m agni {build,calibrate,load,all,sample}.
 
-build   raw FIRMS CSVs → data/interim/*.parquet + detection tiles
-load    data/interim → Postgres (DIRECT_URL, or --database-url)
-all     build + load
-sample  cut data/sample from data/raw
+build      raw FIRMS CSVs → data/interim/*.parquet + detection tiles
+calibrate  MODIS → VIIRS harmonization with leave-one-year-out validation (model v1)
+load       data/interim → Postgres (DIRECT_URL, or --database-url); uses v1 if calibrated
+all        build + calibrate + load
+sample     cut data/sample from data/raw
 """
 
 import argparse
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from agni import aggregate, clean, grid, ingest, naive, tiles
+from agni import aggregate, clean, grid, harmonize, ingest, naive, tiles
 from agni.config import DEFAULT
 
 REPO = Path(__file__).resolve().parents[2]
@@ -64,9 +65,45 @@ def build(raw: Path, interim: Path, tiles_dir: Path, dataset_version: str) -> di
             str(k): int(v) for k, v in det["sensor"].value_counts().sort_index().items() if v
         },
         "dataset_version": dataset_version,
+        # Months whose VIIRS data come from near-real-time files (provisional).
+        "nrt_months": sorted(
+            det.loc[
+                (det["source"] == "nrt") & det["sensor"].isin(["VIIRS_SNPP", "VIIRS_N20"]),
+                "acq_date",
+            ]
+            .dt.strftime("%Y-%m")
+            .unique()
+            .tolist()
+        ),
     }
     (interim / "build.json").write_text(json.dumps(meta, indent=1) + "\n")
+    # Any previous calibration belongs to the previous build.
+    (interim / "model_v1.json").unlink(missing_ok=True)
     return meta
+
+
+def calibrate(interim: Path) -> dict:
+    t0 = time.perf_counter()
+    meta = json.loads((interim / "build.json").read_text())
+    obs = pd.read_parquet(interim / "cell_month.parquet")
+    nrt = {pd.Timestamp(m + "-01") for m in meta.get("nrt_months", [])}
+    cm, model_run, rows, zone_rows, zone = harmonize.run(obs, nrt, DEFAULT)
+    cm.to_parquet(interim / "cell_month_v1.parquet", index=False)
+    zone.rename("zone_id").reset_index().rename(columns={"index": "cell_id"}).to_parquet(
+        interim / "cell_zones.parquet", index=False
+    )
+    (interim / "model_v1.json").write_text(
+        json.dumps({"model_run": model_run, "calibration_rows": rows, "zones": zone_rows}) + "\n"
+    )
+    r = model_run["metrics"]
+    best = r["chosen"][r["headline_metric"]]
+    tile_score = r["by_metric"][r["headline_metric"]]["models"][best]["tile"]
+    _log(
+        f"calibrated: headline={r['headline_metric']} model={best} tile-month {tile_score}; "
+        f"S-NPP last full month {r['snpp_last_full_month']}, outages {r['snpp_outage_months']}",
+        t0,
+    )
+    return r
 
 
 def load(interim: Path, database_url: str, kind: str) -> dict:
@@ -75,6 +112,27 @@ def load(interim: Path, database_url: str, kind: str) -> dict:
     t0 = time.perf_counter()
     meta = json.loads((interim / "build.json").read_text())
     cells = pd.read_parquet(interim / "cells.parquet")
+    if (interim / "model_v1.json").exists():
+        model = json.loads((interim / "model_v1.json").read_text())
+        cm = pd.read_parquet(interim / "cell_month_v1.parquet")
+        zones = pd.read_parquet(interim / "cell_zones.parquet").set_index("cell_id")["zone_id"]
+        cells = cells.assign(zone_id=cells["id"].map(zones))
+        summary = load_all(
+            database_url,
+            cells,
+            cm,
+            model["model_run"],
+            kind,
+            meta["rows_in"],
+            meta["date_min"],
+            meta["date_max"],
+            zones=model["zones"],
+            calibration_rows=model["calibration_rows"],
+            cfg=DEFAULT,
+        )
+        _log(f"loaded {summary}", t0)
+        return summary
+
     cm = pd.read_parquet(interim / "cell_month.parquet")
     model_run = {
         "model_version": naive.MODEL_VERSION,
@@ -96,7 +154,7 @@ def load(interim: Path, database_url: str, kind: str) -> dict:
         meta["rows_in"],
         meta["date_min"],
         meta["date_max"],
-        DEFAULT,
+        cfg=DEFAULT,
     )
     _log(f"loaded {summary}", t0)
     return summary
@@ -120,9 +178,11 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument("--dataset-version", default="data-v1")
 
     add_build_args(sub.add_parser("build", help="raw CSVs → parquet + tiles"))
+    sp_cal = sub.add_parser("calibrate", help="harmonize + validate (model v1)")
+    sp_cal.add_argument("--interim", type=Path, default=REPO / "data" / "interim")
     sp_load = sub.add_parser("load", help="parquet → Postgres")
     sp_load.add_argument("--interim", type=Path, default=REPO / "data" / "interim")
-    sp_all = sub.add_parser("all", help="build + load")
+    sp_all = sub.add_parser("all", help="build + calibrate + load")
     add_build_args(sp_all)
     for sp in (sp_load, sp_all):
         sp.add_argument("--database-url", default=None)
@@ -134,10 +194,13 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
     if a.cmd == "build":
         print(json.dumps(build(a.raw, a.interim, a.tiles, a.dataset_version), indent=1))
+    elif a.cmd == "calibrate":
+        calibrate(a.interim)
     elif a.cmd == "load":
         load(a.interim, _database_url(a.database_url), a.kind)
     elif a.cmd == "all":
         build(a.raw, a.interim, a.tiles, a.dataset_version)
+        calibrate(a.interim)
         load(a.interim, _database_url(a.database_url), a.kind)
     elif a.cmd == "sample":
         from agni.sample import cut_sample
