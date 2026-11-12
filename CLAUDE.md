@@ -245,8 +245,8 @@ AOI can be passed as GeoJSON polygon, bbox, or `lat,lon,radius_km`, or a preset 
 
 - `GET /api/regions` – preset AOIs.
 - `POST /api/analyze` – body: AOI, start, end, mode (`harmonized` | `raw`), metric, selectedMonth, baseline → monthly series + calendar matrix (with source flags) + season profile (median, P10–P90, selected year) + anomaly (count, median, percentile, ratio, robust z, label) + annual totals with Sen's slope / Mann–Kendall. One AOI query serves all panels; a CDN-cacheable `GET ?preset=` variant exists for presets.
-- `POST /api/export/detections` – streamed CSV of raw detections in AOI/date range, read from the tiles that intersect the AOI (date filter + exact point-in-polygon in Node).
-- `POST /api/export/series` – CSV of monthly harmonized series.
+- `GET|POST /api/export/detections` – streamed CSV of raw detections in AOI/date range, read from the tiles that intersect the AOI (date filter + exact point-in-polygon in Node; boundary points count as inside; tiles are date-sorted so reading stops early; cap 500k rows with a `# truncated` note line). Tiles come from `TILES_BASE_URL`, default = the `data-v1` GitHub Release (`lib/tiles.ts`); local/CI use `file://./data/tiles`. Verified: CHT 2014 = 26,239 rows, identical to an independent count; whole CHT record (418k rows) in 2.4 s locally.
+- `GET|POST /api/export/series` – monthly harmonized series CSV (P10–P90, source flag, every raw sensor).
 - `GET /api/method` – calibration model versions + validation metrics for the Method page.
 - `GET /api/health` – DB connectivity + latest ingest date.
 

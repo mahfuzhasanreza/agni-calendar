@@ -353,7 +353,7 @@ export const AnalyzeRequest = z.object({
 | M5 | H2–8 (frontend) | ✅ map + AOI inputs + presets, CalendarHeatmap, mode toggle | **MVP-0 on prod ~H8**: CHT → real 25-year calendar |
 | M6 | H8–13 (data) | ✅ zones, reference, 3 models, LOYO, harmonize, load `v1`, `/api/method` | metrics in DB; prod toggle removes the 2012 jump |
 | M7 | H8–13 (FE/BE) | Season, Anomaly, Annual, RawVsHarmonized, DataTables | all panels on prod for 3 presets |
-| M8 | Night | CSV exports (streamed) | open in spreadsheet; counts match SQL |
+| M8 | Night | ✅ CSV exports (streamed) | open in spreadsheet; counts match SQL |
 | M9 | Night | `/method` + `docs/METHOD.md` + plots; e2e in CI | e2e green |
 | M10 | Sun AM | perf (EXPLAIN, caching), a11y, mobile, share-link, NRT backfill | whole-region < 1.5 s on prod; axe clean |
 | M11 | Sun midday | **Feature freeze**; fixes, README, AI_USAGE, video, project page | DoD checklist complete; submitted early |
