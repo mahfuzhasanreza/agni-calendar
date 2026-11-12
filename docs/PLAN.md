@@ -356,7 +356,7 @@ export const AnalyzeRequest = z.object({
 | M8 | Night | ✅ CSV exports (streamed) | open in spreadsheet; counts match SQL |
 | M9 | Night | ✅ `/method` + `docs/METHOD.md` + plots; e2e in CI | e2e green |
 | M10 | Sun AM | ✅ perf (EXPLAIN, caching), a11y, mobile, share-link, NRT backfill | whole-region < 1.5 s on prod; axe clean |
-| M11 | Sun midday | **Feature freeze**; fixes, README, AI_USAGE, video, project page | DoD checklist complete; submitted early |
+| M11 | Sun midday | ✅ docs (video + submission: team) **Feature freeze**; fixes, README, AI_USAGE, video, project page | DoD checklist complete; submitted early |
 | S1–S4 | if green | nightly NRT, watchlist, PNG export, Bangla, Argentina | — |
 
 ---

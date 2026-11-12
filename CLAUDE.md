@@ -313,10 +313,10 @@ Performance target: any AOI query **< 1.5 s** on the deployed app.
 
 ## 12. Definition of done (MVP)
 
-- [ ] Deployed public URL works on desktop and mobile.
-- [ ] Draw / lat-lon / preset AOI all work; date range works.
-- [ ] Calendar heatmap, season chart, annual chart, anomaly card render from real FIRMS data.
-- [ ] Raw vs Harmonized toggle works; Method page shows validation metrics and chart.
-- [ ] Both CSV exports download correct data.
-- [ ] CI green on `main`; deploy pipeline automatic; README with setup + data steps.
-- [ ] `docs/METHOD.md`, `docs/AI_USAGE.md`, demo video, project page complete.
+- [x] Deployed public URL works on desktop and mobile. (Playwright suite incl. phone layout passes against production, 2026-11-13)
+- [x] Draw / lat-lon / preset AOI all work; date range works.
+- [x] Calendar heatmap, season chart, annual chart, anomaly card render from real FIRMS data.
+- [x] Raw vs Harmonized toggle works; Method page shows validation metrics and chart.
+- [x] Both CSV exports download correct data. (detections verified against independent counts)
+- [x] CI green on `main`; deploy pipeline automatic; README with setup + data steps.
+- [ ] `docs/METHOD.md` ✅, `docs/AI_USAGE.md` ✅, project page draft ✅ (`docs/PROJECT_PAGE.md`), demo script ✅ (`docs/DEMO_SCRIPT.md`); **demo video and submission: team**.
