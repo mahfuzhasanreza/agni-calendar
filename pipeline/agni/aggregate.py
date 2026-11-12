@@ -26,7 +26,7 @@ def monthly_obs(det: pd.DataFrame, cfg: Config = DEFAULT) -> pd.DataFrame:
     """Dense cell × month table with per-sensor detection counts and fire-days.
 
     Columns: cell_id, month, det_modis_t, det_modis_a, det_viirs_snpp, det_viirs_n20,
-    fd_modis (distinct days Terra ∪ Aqua), fd_viirs_snpp, fd_viirs_n20.
+    fd_modis (distinct days Terra ∪ Aqua), fd_modis_t, fd_viirs_snpp, fd_viirs_n20.
     """
     keep = det["qualified"].to_numpy() & det["sensor"].isin(list(DET_COLUMNS)).to_numpy()
     q = det.loc[keep, ["cell_id", "acq_date", "sensor"]].copy()
@@ -44,6 +44,7 @@ def monthly_obs(det: pd.DataFrame, cfg: Config = DEFAULT) -> pd.DataFrame:
     # Fire-days: distinct days with ≥1 detection. MODIS = Terra ∪ Aqua (same day counts once).
     families = {
         "fd_modis": ["MODIS_T", "MODIS_A"],
+        "fd_modis_t": ["MODIS_T"],  # Terra alone: needed to scale the Terra-only months
         "fd_viirs_snpp": ["VIIRS_SNPP"],
         "fd_viirs_n20": ["VIIRS_N20"],
     }

@@ -70,7 +70,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: pipeline/uv.lock
-      - name: Load the committed sample with the real pipeline
+      - name: Build, calibrate (v1) and load the committed sample with the real pipeline
         run: uv run --project pipeline python -m agni all --raw data/sample --kind sample --dataset-version sample
       - name: Pipeline database tests (load is idempotent, geometry correct)
         working-directory: pipeline
@@ -83,7 +83,7 @@ jobs:
           pnpm start &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health -o health.json && break; sleep 1; done
           cat health.json
-          python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'] and r['data']['activeModel']=='raw-v0', r"
+          python3 -c "import json; r=json.load(open('health.json')); assert r['status']=='ok' and r['db']['postgis'] and r['data']['activeModel']=='v1', r"
       - name: Analyze API on the sample (CHT preset, circle, invalid AOI)
         run: |
           curl -sf "http://localhost:3000/api/analyze?preset=chittagong-hill-tracts" -o cht.json

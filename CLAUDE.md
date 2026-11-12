@@ -153,9 +153,11 @@ The method must be simple enough to explain in 60 seconds, documented in `docs/M
 
 **Method decisions adopted 2026-11-12** (details and rationale: `docs/PLAN.md` §1 and §4):
 - Zones (MVP) = ~4 strata of long-term MODIS activity per cell × season (dry Nov–May / wet Jun–Oct). MODIS-only, so no target leakage. Land cover (MCD12Q1) is a stretch goal.
-- Candidate models: quantile mapping (tie-block conditional mean, so MODIS=0 maps to the expected VIIRS small-fire count), log-log regression with Duan smearing, and a sum-preserving ratio baseline. **Select by LOYO error on zone-month totals**, also report cell-month and region-month.
+- Candidate models: quantile mapping (tie-block conditional mean, so MODIS=0 maps to the expected VIIRS small-fire count), log-log regression with Duan smearing, a sum-preserving ratio per zone × season, and **local ratio** (ratio per 1° tile × season, shrunk toward the seasonal ratio, prior α = 100). **Select by LOYO MAE on 1° tile-month totals** (~user-area size); also report cell, zone and region levels.
+- **Model v1 (M6, implemented): local ratio, detections headline.** Held-out tile-month R² 0.952, nMAE 21 %, bias −0.2 %. Reason (found in validation): the VIIRS/MODIS ratio varies 2.7–26 across tiles (jhum hills ≈ 3, agricultural plains 6–8); zone-level scores hid a ~30 % CHT bias. Check: the harmonized 2009–11 → 2012–14 change equals the MODIS-only change (region ×0.89 = ×0.89; CHT ×0.88 vs ×0.89). Full write-up with all numbers: `docs/METHOD.md`.
+- **Bands:** P10–P90 of held-out observed ÷ predicted **1° tile-month totals**, per season × predicted-size bin (≥ 30 samples, else seasons pooled), applied as relative bands to each estimated cell-month (so area sums give area-scale bands). Not a single-cell uncertainty.
+- Known limitation: rare-fire areas where MODIS sees almost nothing (Sundarbans) keep a residual 2012 step (×2.6 instead of ×36); compare those against the VIIRS era only.
 - Calibration window chosen from diagnostics to avoid Terra/Aqua orbital drift (likely 2012–2019/2021). Overlap starts Feb 2012 (S-NPP record starts 20 Jan 2012). Known S-NPP outages → `gap_filled`.
-- AOI uncertainty = sum of cell P10/P90, labeled a "conservative envelope".
 - NRT lacks `type`: apply a static-source mask built from persistent archive `type=2` cells. A one-off NRT backfill of recent months is in the MVP (flag `observed_nrt`); the nightly job is stretch.
 - Dates stay UTC (documented).
 - **VIIRS reference continuity:** S-NPP data ends 2026-11-01. NOAA-20 is calibrated onto S-NPP (2018-04 → 2026-07 overlap, same code + LOYO) and fills S-NPP gaps from 2018 and all months after S-NPP's end (`n20_calibrated`). Demo line: the method survives *two* sensor handovers.
