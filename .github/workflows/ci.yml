@@ -53,6 +53,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://agni:agni@localhost:5432/agni
       DIRECT_URL: postgresql://agni:agni@localhost:5432/agni
+      TILES_BASE_URL: file://./data/tiles # written by the sample pipeline run below
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v5
@@ -92,6 +93,14 @@ jobs:
           test "$code" = "200"
           code=$(curl -s -o bad.json -w "%{http_code}" -X POST http://localhost:3000/api/analyze -H 'content-type: application/json' -d '{"aoi":{"type":"bbox","bbox":[-64.5,-31.5,-64,-31]}}')
           test "$code" = "400"
+      - name: CSV exports on the sample (detections from tiles, monthly series)
+        run: |
+          curl -sf "http://localhost:3000/api/export/detections?preset=chittagong-hill-tracts&start=2014-01&end=2014-12" -o det.csv
+          head -1 det.csv | grep -q '^date,time_utc,lat,lon,sensor'
+          test "$(wc -l < det.csv)" -gt 10
+          curl -sf "http://localhost:3000/api/export/series?preset=chittagong-hill-tracts" -o series.csv
+          head -1 series.csv | grep -q '^month,harmonized_viirs_equivalent'
+          test "$(wc -l < series.csv)" -gt 300
 
   pipeline:
     name: Pipeline (ruff, pytest)

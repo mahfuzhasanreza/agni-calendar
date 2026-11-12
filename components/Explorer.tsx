@@ -13,6 +13,7 @@ import { CalendarHeatmap } from "@/components/charts/CalendarHeatmap";
 import { RawVsHarmonizedChart } from "@/components/charts/RawVsHarmonizedChart";
 import { SeasonChart } from "@/components/charts/SeasonChart";
 import { AnomalyCard } from "@/components/panels/AnomalyCard";
+import { ExportButtons } from "@/components/panels/ExportButtons";
 import { AoiPanel } from "@/components/panels/AoiPanel";
 import { CalendarTable } from "@/components/panels/CalendarTable";
 import { ModeToggle, type Mode } from "@/components/panels/ModeToggle";
@@ -229,6 +230,10 @@ export function Explorer() {
               <SourceFootnote />
             </Panel>
           </div>
+
+          <Panel title="Download the evidence" description={`CSV files for ${title}.`}>
+            <ExportButtons aoi={aoi} start={data.range.start} end={data.range.end} />
+          </Panel>
         </div>
       ) : state.status === "loading" ? (
         <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
