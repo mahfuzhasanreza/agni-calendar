@@ -24,7 +24,7 @@
 | d | Terra/Aqua orbital drift in recent years | Calibration window chosen by diagnostics (likely 2012–2019/2021); report per-year parameter stability |
 | e | NRT has no `type` field | Static-source mask from cells with persistent archive `type=2` |
 | f | Archive lags by months; "this month" isn't current | One-off FIRMS API backfill of recent months in MVP, flagged `observed_nrt` (provisional); nightly job stays stretch |
-| g | Volume: 5.94 M `type=0` detections ≈ 1 GB in Postgres > free tiers (Neon free: 1 GB) | **Free-tier design (decided 2026-11-12):** raw detections are **not stored in Postgres**. They live as gzip CSV tiles (1°×1°) in a GitHub Release (`data-vN`), read only by the detections export. Postgres (Neon free) holds aggregates only (~250 MB) |
+| g | Volume: 5.94 M `type=0` detections ≈ 1 GB in Postgres > free tiers (Neon free: 1 GB) | **Free-tier design (decided 2026-11-12):** raw detections are **not stored in Postgres**. They live as gzip CSV tiles (1°×1°) in the Vercel Blob store `agni-tiles` (`tiles/data-vN/`; first planned as a GitHub Release), read only by the detections export. Postgres (Neon free) holds aggregates only (~250 MB) |
 | r | S-NPP data stops 2026-11-01 (verified in download) | VIIRS reference = S-NPP; after its end (and for S-NPP gaps from 2018) use **NOAA-20 calibrated onto S-NPP** over the 2018–2026 overlap (`n20_calibrated`). Same calibration code as MODIS→S-NPP |
 | h | 4 stats endpoints = 4 identical AOI scans | Single `POST /api/analyze` returns series + calendar + season + anomaly + annual; exports separate |
 | i | PR previews against prod DB | Previews get their own Neon branch (Vercel–Neon integration); migrations only from `main` |
@@ -210,7 +210,7 @@ model IngestRun {
 | CellMonth (active version, dense) | ~2.35 M | ~230–260 MB incl. PK | Neon |
 | ModelRun / CalibrationModel / Region / Zone / IngestRun | small | < 10 MB | Neon |
 | **Neon total** | | **~250–280 MB of 1 GB free** | |
-| Raw detections (`type=0`, archive + NRT): MODIS 1.04 M, S-NPP 3.18 M, NOAA-20 1.73 M | 5.94 M | ~100–150 MB gzip | GitHub Release tiles |
+| Raw detections (`type=0`, archive + NRT): MODIS 1.04 M, S-NPP 3.18 M, NOAA-20 1.73 M | 5.94 M | ~100 MB gzip | Vercel Blob tiles |
 
 If Neon gets tight: drop `det_viirs_n20` from the DB (it's in the tiles), or store months where every count is 0 sparsely and add the per-stratum "MODIS=0" value at query time.
 
@@ -234,7 +234,7 @@ Stages write Parquet to `data/interim/` so each step re-runs independently.
 | `harmonize` | pre-2012 calibrated + bands; 2012+ observed S-NPP; gaps → calibrated + `gap_filled` | → `cell_month.parquet` |
 | `static_mask` | persistent `type=2` cells | → `static_cells.json` |
 | `nrt` | `fetch_area(source, bbox, days)` (FIRMS API — verify endpoint) | backfill / stretch |
-| `tiles` | `write_tiles(detections, out_dir)`: one gzip CSV per 1°×1° tile (`t{lat0}_{lon0}.csv.gz`, rows sorted by date), plus `manifest.json` (tile → bbox, rows, date range, sha256, dataset version) | → `data/tiles/` → GitHub Release `data-vN` |
+| `tiles` | `write_tiles(detections, out_dir)`: one gzip CSV per 1°×1° tile (`t{lat0}_{lon0}.csv.gz`, rows sorted by date), plus `manifest.json` (tile → bbox, rows, date range, sha256, dataset version) | → `data/tiles/` → Vercel Blob `tiles/data-vN/` (scripts/upload-tiles.mjs) |
 | `load` | `load_cells`, `load_cell_month`, `load_model_run`, `activate`, `load_regions` | → Postgres |
 | `plots` | raw vs harmonized; held-out scatter | → `docs/` PNGs |
 | `cli` | `python -m agni {ingest,aggregate,calibrate,load,all,nrt} [--sample]` | |
