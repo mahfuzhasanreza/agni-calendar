@@ -5,7 +5,12 @@
  */
 import type { AnalyzeResponse, MonthStats, SeriesPoint, SourceFlag } from "@/lib/contracts";
 import { calendarMonthOf, monthIndex, monthFromIndex, monthRange, yearOf } from "@/lib/months";
-import { RECORD_START, SNPP_FIRST_FULL_MONTH, SNPP_LAST_MONTH } from "@/lib/sensors";
+import {
+  RECORD_START,
+  SNPP_FIRST_FULL_MONTH,
+  SNPP_LAST_MONTH,
+  TREND_START_YEAR,
+} from "@/lib/sensors";
 import {
   anomalyLabel,
   mean,
@@ -97,6 +102,8 @@ export function buildPanels(rows: MonthRow[], opt: PanelOptions): Panels {
         naive: round(naive),
       },
       harmonized: round(r.harm),
+      harmonizedLow: round(r.harmLo),
+      harmonizedHigh: round(r.harmHi),
     };
   });
   const point = new Map(full.map((p) => [p.month, p]));
@@ -194,7 +201,10 @@ export function buildPanels(rows: MonthRow[], opt: PanelOptions): Panels {
     });
   }
   const trendYears = annualYears.filter(
-    (a) => a.complete && a.year >= Math.floor(startI / 12) && a.year <= Math.floor(endI / 12),
+    (a) =>
+      a.complete &&
+      a.year >= Math.max(Math.floor(startI / 12), TREND_START_YEAR) &&
+      a.year <= Math.floor(endI / 12),
   );
   let trend: Panels["annual"]["trend"] = null;
   if (trendYears.length >= 4) {

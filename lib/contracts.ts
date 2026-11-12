@@ -70,6 +70,9 @@ export type SeriesPoint = {
     naive: number;
   };
   harmonized: number;
+  /** Harmonized P10–P90 band (always present, whatever the mode). */
+  harmonizedLow: number;
+  harmonizedHigh: number;
 };
 
 export type MonthStats = {

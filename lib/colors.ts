@@ -86,3 +86,16 @@ export function heatClasses(max: number, scheme: ColorScheme): HeatClass[] {
     };
   });
 }
+
+/**
+ * Categorical series slots in fixed order (dataviz skill reference palette; the first three
+ * validate in every pairing in both modes). Assigned by role, never by rank:
+ * 1 = harmonized / the value being analysed, 2 = MODIS or the comparison, 3 = VIIRS.
+ */
+export const SERIES: Record<ColorScheme, { s1: string; s2: string; s3: string }> = {
+  light: { s1: "#2a78d6", s2: "#eb6834", s3: "#1baf7a" },
+  dark: { s1: "#3987e5", s2: "#d95926", s3: "#199e70" },
+};
+
+/** Status colors (fixed, never themed); always shown with an icon and a text label. */
+export const STATUS = { warning: "#fab219", critical: "#d03b3b" } as const;

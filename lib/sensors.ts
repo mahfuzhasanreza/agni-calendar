@@ -4,6 +4,8 @@
  */
 export const RECORD_START = "2000-11"; // MODIS Terra
 export const AQUA_START = "2002-07";
+/** First full year with both MODIS satellites: trends start here (Terra-only years are too uncertain). */
+export const TREND_START_YEAR = 2003;
 /** First month with S-NPP data for (almost) the whole month (record starts 2012-01-20). */
 export const SNPP_FIRST_FULL_MONTH = "2012-02";
 /** S-NPP data ends 2026-11-01; NOAA-20 continues the VIIRS record after that. */
