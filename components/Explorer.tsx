@@ -16,6 +16,7 @@ import { AnomalyCard } from "@/components/panels/AnomalyCard";
 import { ExportButtons } from "@/components/panels/ExportButtons";
 import { FireMapPanel } from "@/components/panels/FireMapPanel";
 import { FirmsLinks } from "@/components/panels/FirmsLinks";
+import { WorldviewLink } from "@/components/panels/WorldviewLink";
 import { AoiPanel } from "@/components/panels/AoiPanel";
 import { CalendarTable } from "@/components/panels/CalendarTable";
 import { ModeToggle, type Mode } from "@/components/panels/ModeToggle";
@@ -238,6 +239,7 @@ export function Explorer() {
                 latestCompleteMonth={data.latestCompleteMonth}
                 onSelectMonth={setSelectedMonth}
               />
+              <WorldviewLink aoi={aoi} month={data.anomaly.month} />
             </Panel>
             <Panel
               title="One record from two sensor families"

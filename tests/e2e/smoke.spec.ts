@@ -76,6 +76,20 @@ test("3D fire map: opens on demand, steps through years, has a table alternative
   ).toBeVisible();
 });
 
+test("anomaly card links to NASA Worldview for a day of the selected month", async ({ page }) => {
+  await page.goto("/?preset=chittagong-hill-tracts&month=2024-03");
+  await waitForAnalysis(page);
+  const link = page.getByRole("link", { name: "Open 2024-03-15 in NASA Worldview" });
+  await expect(link).toBeVisible();
+  await page.getByRole("spinbutton", { name: /Day/ }).fill("2");
+  const href = await page
+    .getByRole("link", { name: "Open 2024-03-02 in NASA Worldview" })
+    .getAttribute("href");
+  expect(href).toMatch(/^https:\/\/worldview\.earthdata\.nasa\.gov\/\?p=geographic&v=/);
+  expect(href).toContain("VIIRS_SNPP_Thermal_Anomalies_375m_All");
+  expect(href).toMatch(/&t=2024-03-02-T00:00:00Z$/);
+});
+
 test("explorer: raw / harmonized toggle changes the units", async ({ page }) => {
   await page.goto("/");
   await waitForAnalysis(page);

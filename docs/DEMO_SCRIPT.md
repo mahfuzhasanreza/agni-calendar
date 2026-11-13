@@ -45,6 +45,7 @@ desktop browser at ~1440 px wide, light or dark mode consistently, and close oth
 - Screen: "This month vs history" card; pick a month (e.g. March 2024) in **Month to compare**.
 - Say: "For responders: this month against the same month in twenty years of baseline. Percentile, ratio to median, and a clear label: below normal, normal, above normal or extreme."
 - Optional: **Sundarbans** preset: "In a protected mangrove forest, any fire is an anomaly."
+- Optional: under the card, **Open … in NASA Worldview**: "And you can check any month against the actual satellite image, in NASA Worldview."
 
 ### 5. Evidence (1:30–1:45)
 - Screen: "Download the evidence" → click **Raw detections (CSV)** and **Monthly harmonized series (CSV)**; show the file opening.
