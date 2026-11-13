@@ -13,17 +13,17 @@ The guide's timing: 0:00 who you are → 0:02 the challenge and why → 0:05 pro
 
 | Time | Screen (record each shot separately, cut together) | Voice-over (≈ 72 words) | On-screen text |
 |---|---|---|---|
-| 0:00–0:02 | Agni home page, header visible | "Hi, I'm Mahfuz from team Dabanol." | **Team Dabanol** |
-| 0:02–0:05 | Explorer, Chittagong Hill Tracts preset, map zooms in | "Every spring, the hills near my home burn." | *Harmonization of MODIS and VIIRS Hot Spots* |
+| 0:00–0:03 | Agni home page, header visible, with the **team card overlaid** on the lower third | "Hi, we're team Dabanol, from Bangladesh." | **Team Dabanol** · Name 1, *role* · Name 2, *role* · Name 3, *role* |
+| 0:03–0:05 | Explorer, Chittagong Hill Tracts preset, map zooms in | "Every spring, the hills near my home burn." | *Harmonization of MODIS and VIIRS Hot Spots* |
 | 0:05–0:10 | Scroll to "One record from two sensor families", mode **Raw**: the 2012 jump | "This is Agni: twenty-five years of fire history, one consistent calendar." | **Agni: 25 years of fire history, one consistent calendar** |
 | 0:10–0:15 | Click **Replay**: the raw line morphs into the harmonized line | "In 2012, NASA's VIIRS sensor began seeing five times more fires than MODIS, faking a fire explosion. Agni calibrates MODIS onto VIIRS, and the jump disappears." | Raw ×3.05 → Harmonized ×0.88 |
 | 0:15–0:20 | 3D fire map, **Raw**: slider 2011 → 2012 (region lights up); switch **Harmonized**, 2011 → 2012 | (continues) | NASA FIRMS · MODIS + VIIRS · 5.9 M hotspots |
 | 0:20–0:25 | Burning calendar (Feb–Apr jhum season), then the "This month vs history" label, then click **Raw detections (CSV)** | "Draw any area: see its burning season, this month's anomaly, and download the evidence." | Calendar · Anomaly · CSV |
-| 0:25–0:28 | Harmonized annual chart, then a title card | "When MODIS goes dark, its history lives on." | **agni-calendar.vercel.app** |
+| 0:25–0:29 | Harmonized annual chart, then the **end card** (hold ≥ 2 s) | "When MODIS goes dark, its history lives on." | End card: **Agni** · agni-calendar.vercel.app · Team Dabanol: Name 1 · Name 2 · Name 3 · *NASA FIRMS data* |
 
 Voice-over as one paragraph (read it aloud with a stopwatch; it must fit in 28 s):
 
-> Hi, I'm Mahfuz from team Dabanol. Every spring, the hills near my home burn. This is Agni:
+> Hi, we're team Dabanol, from Bangladesh. Every spring, the hills near my home burn. This is Agni:
 > twenty-five years of fire history, one consistent calendar. In 2012, NASA's VIIRS sensor began
 > seeing five times more fires than MODIS, faking a fire explosion. Agni calibrates MODIS onto VIIRS,
 > and the jump disappears. Draw any area: see its burning season, this month's anomaly, and
@@ -32,6 +32,19 @@ Voice-over as one paragraph (read it aloud with a stopwatch; it must fit in 28 s
 About 72 words ≈ 28 s at a calm pace. If it runs long, cut "faking a fire explosion" first. The
 challenge name is on screen at 0:02–0:05 (*Harmonization of MODIS and VIIRS Hot Spots*), so it
 need not be spoken.
+
+## Team card and end card
+
+The guide asks the video to say who you are and your team name (member names are required only for
+slide decks). To save seconds, the team is shown **on screen**, not read aloud:
+
+- **Opening overlay (0:00–0:03)**, lower third over the app, large readable text:
+  `Team Dabanol` and one line per member: `Name — role`. Suggested roles (use what each person
+  really did): *Data & harmonization method*, *Web app & 3D map*, *Story, design & video*.
+- **End card (last 2–4 s)**: Agni logo/title, `agni-calendar.vercel.app`, `Team Dabanol: Name 1 ·
+  Name 2 · Name 3`, `Data: NASA FIRMS (MODIS, VIIRS)`. Plain text on a dark or light background;
+  no NASA logo (the Space Apps rules do not allow NASA branding in team-made graphics).
+- Names only as people want them shown publicly; no one under 18 may appear.
 
 ## Recording checklist
 
