@@ -87,6 +87,9 @@ record survives two sensor handovers: MODIS → VIIRS and S-NPP → NOAA-20.
 
 Caveats shown in the app and appended to every detections CSV: FIRMS data are provided "as is" ([LANCE disclaimer](https://www.earthdata.nasa.gov/data/projects/lance/disclaimer)). A hotspot is the centre of a ~1 km (MODIS) or 375 m (VIIRS) pixel containing one or more fires or thermal anomalies, not the exact fire location; fires can be missed under cloud, smoke or canopy, when small or cool, or between overpasses. Times are UTC.
 
+To check a month against the satellite record itself, Agni links each selected month to **NASA
+Worldview** (Earthdata) with that era's fire layer on a true-colour image.
+
 For live fires, Agni hands responders over to the FIRMS Fire Map and FIRMS email alerts (with the
 area's box ready to paste as a Custom Region).
 
