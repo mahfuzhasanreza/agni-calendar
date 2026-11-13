@@ -16,7 +16,7 @@ In the Chittagong Hill Tracts the raw record shows fire significantly **increasi
 
 1. **Clean:** vegetation fires only (FIRMS `type` 0); MODIS confidence ≥ 30, VIIRS nominal/high.
 2. **Grid:** detections per 0.1° cell per month (7,434 burning cells × 313 months).
-3. **Reference sensors:** MODIS Terra + Aqua; VIIRS S-NPP, continued by NOAA-20 after S-NPP stopped (1 Nov 2026).
+3. **Reference sensors:** MODIS Terra + Aqua; VIIRS S-NPP, continued by NOAA-20 after S-NPP stopped (NASA: 2 Nov 2026).
 4. **Calibrate** on the 2012–2025 overlap: a VIIRS/MODIS ratio per 1° tile and season (it ranges from ~3 in jhum hills to 6–8 in agricultural plains).
 5. **Validate** by leaving each year out and predicting it from MODIS: held-out 1° tile-month R² 0.952, error 21 %, bias −0.2 %; region-month R² 0.984.
 6. **Publish** one record in VIIRS-equivalent units with P10–P90 uncertainty bands on every estimated month.
@@ -85,6 +85,12 @@ Production deploys from GitHub Actions after CI passes on `main` (`.github/workf
 
 ## Data and credits
 
-NASA FIRMS (Fire Information for Resource Management System): MODIS Collection 6.1 (Terra, Aqua) and VIIRS 375 m Collection 2 (S-NPP, NOAA-20) active-fire products, standard archive + near-real-time. Basemap: OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors.
+NASA FIRMS (Fire Information for Resource Management System): MODIS Collection 6.1 (Terra, Aqua) and VIIRS 375 m Collection 2 (S-NPP, NOAA-20) active-fire products, standard archive + near-real-time.
+
+We acknowledge the use of data and/or imagery from NASA's Fire Information for Resource Management System (FIRMS) (https://earthdata.nasa.gov/firms), operated by NASA's ESDIS project as part of LANCE.
+
+Algorithms: Giglio et al. 2016 ([doi:10.1016/j.rse.2016.02.054](https://doi.org/10.1016/j.rse.2016.02.054)), Schroeder et al. 2014 ([doi:10.1016/j.rse.2013.12.008](https://doi.org/10.1016/j.rse.2013.12.008)). Caveats: FIRMS data are provided "as is" ([LANCE disclaimer](https://www.earthdata.nasa.gov/data/projects/lance/disclaimer)). A hotspot is the centre of a ~1 km (MODIS) or 375 m (VIIRS) pixel containing one or more fires or thermal anomalies, not the exact fire location; fires can be missed under cloud, smoke or canopy, when small or cool, or between overpasses. Times are UTC.
+
+Basemap: OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors.
 
 Built with Claude Code (Anthropic): see [`docs/AI_USAGE.md`](docs/AI_USAGE.md).

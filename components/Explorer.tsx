@@ -14,6 +14,7 @@ import { RawVsHarmonizedChart } from "@/components/charts/RawVsHarmonizedChart";
 import { SeasonChart } from "@/components/charts/SeasonChart";
 import { AnomalyCard } from "@/components/panels/AnomalyCard";
 import { ExportButtons } from "@/components/panels/ExportButtons";
+import { FirmsLinks } from "@/components/panels/FirmsLinks";
 import { AoiPanel } from "@/components/panels/AoiPanel";
 import { CalendarTable } from "@/components/panels/CalendarTable";
 import { ModeToggle, type Mode } from "@/components/panels/ModeToggle";
@@ -282,6 +283,13 @@ export function Explorer() {
 
           <Panel title="Download the evidence" description={`CSV files for ${title}.`}>
             <ExportButtons aoi={aoi} start={data.range.start} end={data.range.end} />
+          </Panel>
+
+          <Panel
+            title="Live fires and alerts"
+            description="Hand-over to NASA FIRMS for near-real-time monitoring."
+          >
+            <FirmsLinks aoi={aoi} />
           </Panel>
         </div>
       ) : state.status === "loading" ? (

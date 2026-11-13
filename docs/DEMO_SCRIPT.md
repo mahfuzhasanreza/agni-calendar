@@ -45,6 +45,7 @@ desktop browser at ~1440 px wide, light or dark mode consistently, and close oth
 ### 5. Evidence (1:30–1:45)
 - Screen: "Download the evidence" → click **Raw detections (CSV)** and **Monthly harmonized series (CSV)**; show the file opening.
 - Say: "Every hotspot behind the numbers, with sensor, confidence and fire power, ready for a report."
+- Optional (if time): scroll to "Live fires and alerts": "For fires burning right now, Agni hands you over to NASA FIRMS: the live Fire Map, or an email alert for this exact area." Extra line for the method: "S-NPP went dark on 2 November 2026; Agni already continues with NOAA-20, so the record has survived two sensor handovers."
 
 ### 6. Close (1:45–2:00)
 - Screen: Annual totals and trend (CHT harmonized, −470/year), then the Agni header.

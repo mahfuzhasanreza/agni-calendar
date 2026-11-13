@@ -45,7 +45,7 @@ radius) and a date range. Agni shows:
    *local ratio* learns the VIIRS/MODIS ratio in each 1° tile and season.
 4. Validate with leave-one-year-out cross-validation at four spatial levels. Selected model,
    held-out: 1° tile-month R² 0.952, error 21 %, bias −0.2 %; region-month R² 0.984.
-5. Continue the record with NOAA-20 after S-NPP stopped on 1 November 2026 (held-out R² 0.992), and
+5. Continue the record with NOAA-20 after S-NPP stopped (NASA: 2 November 2026; held-out R² 0.992), and
    scale the 2000–2002 Terra-only months with wider uncertainty.
 
 **What we learned.** The VIIRS/MODIS ratio is not one number: about 3 in the jhum (shifting
@@ -78,7 +78,17 @@ Playwright (including automated accessibility checks).
   (Apr 2018 – Nov 2026), standard archive + near-real-time.
 
 Source: NASA Fire Information for Resource Management System (FIRMS),
-https://firms.modaps.eosdis.nasa.gov/.
+https://www.earthdata.nasa.gov/data/tools/firms.
+
+We acknowledge the use of data and/or imagery from NASA's Fire Information for Resource Management System (FIRMS) (https://earthdata.nasa.gov/firms), operated by NASA's ESDIS project as part of LANCE.
+
+NASA announced that Suomi NPP stopped delivering data at 15:40 UTC on 2 November 2026 and directed users to NOAA-20 and NOAA-21 ([Earthdata alert](https://www.earthdata.nasa.gov/data/alerts-outages/reminder-new-suomi-npp-observations-cease-november-2-2026)). Agni already continues the VIIRS reference with NOAA-20 (calibrated onto S-NPP), so the
+record survives two sensor handovers: MODIS → VIIRS and S-NPP → NOAA-20.
+
+Caveats shown in the app and appended to every detections CSV: FIRMS data are provided "as is" ([LANCE disclaimer](https://www.earthdata.nasa.gov/data/projects/lance/disclaimer)). A hotspot is the centre of a ~1 km (MODIS) or 375 m (VIIRS) pixel containing one or more fires or thermal anomalies, not the exact fire location; fires can be missed under cloud, smoke or canopy, when small or cool, or between overpasses. Times are UTC.
+
+For live fires, Agni hands responders over to the FIRMS Fire Map and FIRMS email alerts (with the
+area's box ready to paste as a Custom Region).
 
 ## Space agency partner and other data
 - Challenge by CONAE (Argentina) with NASA.
@@ -98,9 +108,10 @@ NASA FIRMS data processed by the documented pipeline. A dated log is in
 ## References
 - Giglio, L., Schroeder, W., Justice, C. O. (2016). The collection 6 MODIS active fire detection
   algorithm and fire products. *Remote Sensing of Environment*, 178, 31–41.
+  https://doi.org/10.1016/j.rse.2016.02.054
 - Schroeder, W., Oliva, P., Giglio, L., Csiszar, I. (2014). The New VIIRS 375 m active fire detection
   data product: Algorithm description and initial assessment. *Remote Sensing of Environment*, 143,
-  85–96.
+  85–96. https://doi.org/10.1016/j.rse.2013.12.008
 - Sen, P. K. (1968). Estimates of the regression coefficient based on Kendall's tau. *JASA*, 63,
   1379–1389.
 - Duan, N. (1983). Smearing estimate: a nonparametric retransformation method. *JASA*, 78, 605–610.

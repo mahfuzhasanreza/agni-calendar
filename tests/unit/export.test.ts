@@ -163,7 +163,13 @@ describe("tile export (real gzip files)", () => {
       out.push(line);
     }
     expect(out[0]).toBe(columns);
-    expect(out.slice(1)).toEqual([row("2014-03-01", 22.6, 92.2)]); // lon 92.9 outside, 2015 outside
+    const data = out.slice(1).filter((l) => !l.startsWith("#"));
+    expect(data).toEqual([row("2014-03-01", 22.6, 92.2)]); // lon 92.9 outside, 2015 outside
+    // FIRMS acknowledgement + caveats trail the data as comment lines.
+    const notes = out.slice(2);
+    expect(notes.every((l) => l.startsWith("# "))).toBe(true);
+    expect(notes[0]).toMatch(/We acknowledge the use of data .* \(FIRMS\)/);
+    expect(notes.some((l) => l.includes("centre of a"))).toBe(true);
   });
 
   it("stops with a note at the row limit", async () => {
@@ -179,7 +185,8 @@ describe("tile export (real gzip files)", () => {
     })) {
       out.push(line);
     }
-    expect(out).toHaveLength(3);
     expect(out[2]).toMatch(/^# truncated at 1 rows/);
+    expect(out.slice(3).length).toBeGreaterThan(0);
+    expect(out.slice(3).every((l) => l.startsWith("# "))).toBe(true);
   });
 });
