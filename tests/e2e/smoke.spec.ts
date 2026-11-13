@@ -51,6 +51,31 @@ test("explorer: reduced motion shows the final chart without the replay control"
   await context.close();
 });
 
+test("3D fire map: opens on demand, steps through years, has a table alternative", async ({
+  page,
+}) => {
+  await page.goto("/?mode=raw");
+  await waitForAnalysis(page);
+  await page.getByRole("button", { name: "Open the 3D fire map" }).click();
+  const slider = page.getByRole("slider");
+  await expect(slider).toBeVisible();
+  await expect(page.getByRole("application", { name: /3D map of raw hotspots/ })).toBeVisible();
+  await slider.fill("10"); // 2001 + 10
+  await expect(
+    page.getByRole("application", { name: /3D map of raw hotspots per 0.1° cell in 2011/ }),
+  ).toBeVisible();
+  await expect(page.getByText("Raw · MODIS era (1 km pixels)")).toBeVisible();
+  await slider.fill("11");
+  await expect(page.getByText("Raw · VIIRS era (375 m pixels)")).toBeVisible();
+  await page.getByText("Show the data as a table").last().click();
+  await expect(
+    page
+      .getByRole("rowheader", { name: "2012" })
+      .or(page.getByRole("cell", { name: "2012" }))
+      .first(),
+  ).toBeVisible();
+});
+
 test("explorer: raw / harmonized toggle changes the units", async ({ page }) => {
   await page.goto("/");
   await waitForAnalysis(page);

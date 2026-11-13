@@ -32,6 +32,10 @@ desktop browser at ~1440 px wide, light or dark mode consistently, and close oth
 - Then open **Method** in the header: point at the table (local ratio R² 0.952) and the held-out chart.
 - Say: "We test it honestly: every year is predicted by a model that never saw it. Held-out R² 0.95 on tile totals. And we found that the ratio depends on the kind of fire: about 3 in the jhum hills, 6 to 8 in the plains."
 
+### 2b. Optional 3D beat (≈10 s, if the video has room)
+- Screen: mode **Raw** → "25 years of fire in 3D" → **Open the 3D fire map** → drag the Year slider from 2011 to 2012: the whole region lights up (39k → 212k hotspots). Switch the mode to **Harmonized** and repeat: 2011 and 2012 look alike (193k → 216k).
+- Say: "In raw data the whole region seems to catch fire in 2012. It didn't; the satellite changed. Harmonized, the 25 years line up."
+
 ### 3. The burning calendar (0:45–1:10)
 - Screen: back to Explorer → scroll to **Burning calendar**; hover a March cell.
 - Say: "Twenty-five years, one row per year: the jhum burning season every February to April, in one consistent unit. Hatched cells are the least certain early years, and every chart has a table and a source note."
