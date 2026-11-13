@@ -43,7 +43,8 @@ slide decks). To save seconds, the team is shown **on screen**, not read aloud:
   really did): *Data & harmonization method*, *Web app & 3D map*, *Story, design & video*.
 - **End card (last 2–4 s)**: Agni logo/title, `agni-calendar.vercel.app`, `Team Dabanol: Name 1 ·
   Name 2 · Name 3`, `Data: NASA FIRMS (MODIS, VIIRS)`. Plain text on a dark or light background;
-  no NASA logo (the Space Apps rules do not allow NASA branding in team-made graphics).
+  no NASA logo (the guide forbids NASA branding in SI-generated content; keeping it out of all
+  your graphics is the safe choice).
 - Names only as people want them shown publicly; no one under 18 may appear.
 
 ## Recording checklist
