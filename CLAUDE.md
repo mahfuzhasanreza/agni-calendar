@@ -310,6 +310,8 @@ Performance target: any AOI query **< 1.5 s** on the deployed app.
 
 ## 11. Demo story (Presentation)
 
+**Official rules (2026 guides, read 2026-11-14):** the demo is ONE video **≤ 30 s** (or ≤ 7 slides); over the limit = not eligible for Global Judging. English, or English subtitles. Public link, no login. No person under 18. SI-generated media need a visible watermark. Submission window: Sat 14 Nov 09:00 → Sun 15 Nov 23:59 (local event time); "Submit for Judging" + both checkboxes; resubmission allowed until the deadline. Script: `docs/DEMO_SCRIPT.md`; form text: `docs/PROJECT_PAGE.md` (fields in official order). The longer story below is for the project page, not the video.
+
 1. Problem in one chart: raw 2000–today series with the fake 2012 jump.
 2. Click "Harmonize": the jump disappears; show validation metrics.
 3. Draw the Chittagong Hill Tracts: calendar shows the Feb–Apr jhum season across 25 years.
