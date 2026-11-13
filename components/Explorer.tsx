@@ -14,6 +14,7 @@ import { RawVsHarmonizedChart } from "@/components/charts/RawVsHarmonizedChart";
 import { SeasonChart } from "@/components/charts/SeasonChart";
 import { AnomalyCard } from "@/components/panels/AnomalyCard";
 import { ExportButtons } from "@/components/panels/ExportButtons";
+import { FireMapPanel } from "@/components/panels/FireMapPanel";
 import { FirmsLinks } from "@/components/panels/FirmsLinks";
 import { AoiPanel } from "@/components/panels/AoiPanel";
 import { CalendarTable } from "@/components/panels/CalendarTable";
@@ -256,6 +257,14 @@ export function Explorer() {
               Hatched cells are estimates with lower confidence. Hover a cell for its value.
             </p>
             <CalendarTable calendar={data.calendar} caption={`${title}: monthly ${unitsShort}`} />
+            <SourceFootnote />
+          </Panel>
+
+          <Panel
+            title="25 years of fire in 3D"
+            description="The whole region, one year at a time. Switch Raw / Harmonized above."
+          >
+            <FireMapPanel mode={mode} ring={ring} />
             <SourceFootnote />
           </Panel>
 

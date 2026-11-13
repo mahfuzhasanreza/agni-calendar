@@ -33,7 +33,7 @@ NASA FIRMS CSVs ──► Python pipeline (pipeline/agni)
             models + validation report             (CSV export only)
                          │                                   │
                          └──────────► Next.js on Vercel ◄────┘
-                                      /api/analyze, /api/export/*, /api/method
+                                      /api/analyze, /api/export/*, /api/method, /api/fire-map
                                       map + calendar + charts + downloads + method page
 ```
 

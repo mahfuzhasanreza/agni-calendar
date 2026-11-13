@@ -78,6 +78,8 @@ jobs:
                 "$PRODUCTION_URL/api/analyze?preset=$preset&mode=$mode&start=2000-11"
             done
           done
+          curl -s -o /dev/null -w "3D fire map: %{http_code} %{time_total}s\n" \
+            "$PRODUCTION_URL/api/fire-map"
 
   preview:
     name: Preview deploy
