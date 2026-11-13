@@ -77,7 +77,7 @@ agencies an evidence base for fire-season planning, and extend the same pipeline
 Sundarbans part of the 2012 step remains, so comparisons there should use the VIIRS era. Single
 0.1° cells are much less certain than area totals; preset areas are approximate boxes.
 
-**Tools.** Python (pandas, NumPy, SciPy, psycopg), TypeScript / Next.js, PostgreSQL + PostGIS
+**Tools.** Python (pandas, NumPy, psycopg), TypeScript / Next.js, PostgreSQL + PostGIS
 (Neon), Prisma, Vercel and Vercel Blob, MapLibre GL, ECharts, terra-draw, Tailwind CSS, GitHub
 Actions; tests with pytest, Vitest and Playwright (including automated accessibility checks).
 Source code: https://github.com/mahfuzhasanreza/agni-calendar
@@ -136,7 +136,7 @@ of Argentina) with NASA. No partner datasets are used; all fire data are NASA FI
 
 **Open-source software** (all under open licences): Next.js, React, Prisma, PostgreSQL, PostGIS,
 MapLibre GL JS, terra-draw, Apache ECharts, Tailwind CSS, shadcn/ui and Base UI, Zod, pandas,
-NumPy, SciPy, psycopg, pytest, Vitest, Playwright, axe-core.
+NumPy, psycopg, pytest, Vitest, Playwright, axe-core.
 
 **Hosting.** Vercel (app and file storage), Neon (PostgreSQL), GitHub (code and CI).
 
