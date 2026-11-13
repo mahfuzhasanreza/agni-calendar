@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { FIRMS_URLS } from "@/lib/firms";
 import { site } from "@/lib/site";
 
@@ -26,10 +27,13 @@ export function SiteHeader({ current }: { current: "explorer" | "method" }) {
         </h1>
         <p className="text-lg text-muted-foreground">{site.tagline}</p>
       </div>
-      <nav aria-label="Main" className="flex gap-1">
-        {link("/", "Explorer", current === "explorer")}
-        {link("/method", "Method", current === "method")}
-      </nav>
+      <div className="flex items-center gap-3">
+        <nav aria-label="Main" className="flex gap-1">
+          {link("/", "Explorer", current === "explorer")}
+          {link("/method", "Method", current === "method")}
+        </nav>
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

@@ -2,20 +2,21 @@
 
 import { useSyncExternalStore } from "react";
 import type { ColorScheme } from "@/lib/colors";
-
-const QUERY = "(prefers-color-scheme: dark)";
+import { THEME_EVENT } from "@/lib/theme";
 
 function subscribe(onChange: () => void) {
-  const mq = window.matchMedia(QUERY);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
+  window.addEventListener(THEME_EVENT, onChange);
+  return () => window.removeEventListener(THEME_EVENT, onChange);
 }
 
-/** The operating system color scheme (charts use their own validated steps per mode). */
+/**
+ * The effective colour scheme (header toggle: light / dark / device), as set on
+ * <html data-theme> by lib/theme.ts. Charts use their own validated colour steps per scheme.
+ */
 export function useColorScheme(): ColorScheme {
   return useSyncExternalStore(
     subscribe,
-    () => (window.matchMedia(QUERY).matches ? "dark" : "light"),
+    () => (document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"),
     () => "light",
   );
 }

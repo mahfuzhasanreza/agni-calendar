@@ -90,6 +90,47 @@ test("anomaly card links to NASA Worldview for a day of the selected month", asy
   expect(href).toMatch(/&t=2024-03-02-T00:00:00Z$/);
 });
 
+test("theme toggle: light, dark and device; remembered after reload", async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: "dark" });
+  const page = await context.newPage();
+  const html = page.locator("html");
+  await page.goto("/method");
+  // Default = device, which is emulated as dark here.
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Device theme" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "Light theme" }).click();
+  await expect(html).toHaveAttribute("data-theme", "light");
+  await page.reload();
+  await expect(html).toHaveAttribute("data-theme", "light");
+  await expect(page.getByRole("button", { name: "Light theme" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "Device theme" }).click();
+  await expect(html).toHaveAttribute("data-theme", "dark");
+  await context.close();
+});
+
+test("accessibility in forced dark theme: no serious or critical axe violations", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ colorScheme: "light" });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.getByRole("button", { name: "Dark theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await waitForAnalysis(page);
+  const results = await new AxeBuilder({ page }).analyze();
+  const serious = results.violations.filter((v) =>
+    ["serious", "critical"].includes(v.impact ?? ""),
+  );
+  expect(serious.map((v) => v.id)).toEqual([]);
+  await context.close();
+});
+
 test("explorer: raw / harmonized toggle changes the units", async ({ page }) => {
   await page.goto("/");
   await waitForAnalysis(page);
