@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { EChart, type ChartOption } from "@/components/charts/EChart";
+import { EChart, motion, type ChartOption } from "@/components/charts/EChart";
 import { axisNumber, axisStyle, lineKey, tooltipStyle } from "@/components/charts/chart-theme";
 import { DataTable } from "@/components/panels/DataTable";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { CHART_THEME, SERIES } from "@/lib/colors";
 import type { AnalyzeResponse } from "@/lib/contracts";
 import { formatCount, monthLong, monthShort } from "@/lib/format";
@@ -19,6 +20,7 @@ type Props = {
 /** Fire season profile: baseline median with its P10–P90 range, and the selected year. */
 export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
   const scheme = useColorScheme();
+  const animate = !useReducedMotion();
   const year = season.selectedYear.year;
   const medianName = `Median ${baseline.from}–${baseline.to}`;
 
@@ -28,7 +30,7 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
     const ax = axisStyle(scheme);
     const m = season.months;
     return {
-      animation: false,
+      ...motion(animate),
       aria: { enabled: true, label: { enabled: false } },
       grid: { left: 52, right: 16, top: 56, bottom: 28 },
       legend: {
@@ -72,6 +74,7 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
       },
       series: [
         {
+          id: "p10",
           name: "p10",
           type: "line",
           stack: "range",
@@ -81,6 +84,7 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
           silent: true,
         },
         {
+          id: "range",
           name: "P10–P90",
           type: "line",
           stack: "range",
@@ -91,6 +95,7 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
           silent: true,
         },
         {
+          id: "median",
           name: medianName,
           type: "line",
           data: m.map((s) => s.median),
@@ -101,6 +106,7 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
           itemStyle: { color: c.s1 },
         },
         {
+          id: "selected",
           name: String(year),
           type: "line",
           data: season.selectedYear.values,
@@ -112,13 +118,14 @@ export function SeasonChart({ season, baseline, unitsShort, title }: Props) {
         },
       ],
     };
-  }, [season, scheme, medianName, year, unitsShort]);
+  }, [season, scheme, medianName, year, unitsShort, animate]);
 
   return (
     <figure>
       <EChart
         option={option}
         height={280}
+        animate={animate}
         ariaLabel={`${title}: monthly fire season profile, ${medianName} with P10 to P90 range, and ${year}. A table version follows.`}
       />
       <figcaption className="mt-1 text-xs text-muted-foreground">

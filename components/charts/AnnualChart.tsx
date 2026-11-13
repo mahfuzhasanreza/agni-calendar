@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { EChart, type ChartOption } from "@/components/charts/EChart";
+import { EChart, motion, type ChartOption } from "@/components/charts/EChart";
 import { axisNumber, axisStyle, lineKey, tooltipStyle } from "@/components/charts/chart-theme";
 import { DataTable } from "@/components/panels/DataTable";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { CHART_THEME, SERIES } from "@/lib/colors";
 import type { AnalyzeResponse } from "@/lib/contracts";
 import { formatCount } from "@/lib/format";
@@ -18,6 +19,7 @@ type Props = {
 /** Annual totals (bars) with the Sen's-slope trend over complete years. */
 export function AnnualChart({ annual, unitsShort, title }: Props) {
   const scheme = useColorScheme();
+  const animate = !useReducedMotion();
   const trend = annual.trend;
 
   const option = useMemo<ChartOption>(() => {
@@ -30,7 +32,7 @@ export function AnnualChart({ annual, unitsShort, title }: Props) {
         ? trend.intercept + trend.slopePerYear * y
         : null;
     return {
-      animation: false,
+      ...motion(animate),
       aria: { enabled: true, label: { enabled: false } },
       grid: { left: 52, right: 16, top: 56, bottom: 28 },
       legend: {
@@ -76,6 +78,7 @@ export function AnnualChart({ annual, unitsShort, title }: Props) {
       },
       series: [
         {
+          id: "total",
           name: "Annual total",
           type: "bar",
           barMaxWidth: 24,
@@ -88,22 +91,20 @@ export function AnnualChart({ annual, unitsShort, title }: Props) {
             },
           })),
         },
-        ...(trend
-          ? [
-              {
-                name: "Trend (Sen's slope)",
-                type: "line",
-                data: years.map((y) => trendValue(y.year)),
-                symbol: "none",
-                lineStyle: { width: 2, color: c.s2 },
-                itemStyle: { color: c.s2 },
-                connectNulls: false,
-              },
-            ]
-          : []),
+        // Always present (empty without a trend) so animated updates keep the same series.
+        {
+          id: "trend",
+          name: "Trend (Sen's slope)",
+          type: "line",
+          data: years.map((y) => trendValue(y.year)),
+          symbol: "none",
+          lineStyle: { width: 2, color: c.s2 },
+          itemStyle: { color: c.s2 },
+          connectNulls: false,
+        },
       ],
     };
-  }, [annual, scheme, trend, unitsShort]);
+  }, [annual, scheme, trend, unitsShort, animate]);
 
   return (
     <figure>
@@ -126,6 +127,7 @@ export function AnnualChart({ annual, unitsShort, title }: Props) {
       <EChart
         option={option}
         height={280}
+        animate={animate}
         ariaLabel={`${title}: annual ${unitsShort} with trend line. A table version follows.`}
       />
       <figcaption className="mt-1 text-xs text-muted-foreground">
