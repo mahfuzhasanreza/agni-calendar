@@ -14,7 +14,7 @@ desktop browser at ~1440 px wide, light or dark mode consistently, and close oth
 | Time | Screen | Voice-over |
 |---|---|---|
 | 0–6 s | Explorer, CHT preset, **Raw** selected, scroll to "One record from two sensor families" | "Satellites have watched fires for 25 years, but in 2012 the sensor changed, and the record suddenly shows three times more fire." |
-| 6–14 s | Click **Harmonized**; point at the readout "raw ×3.05 · harmonized ×0.88 · MODIS alone ×0.89" | "Agni converts the old MODIS years into today's VIIRS units, validated year by year. The fake jump disappears." |
+| 6–14 s | Click **Replay** on the chart (raw jump morphs into the harmonized line), then **Harmonized**; point at the readout "raw ×3.05 · harmonized ×0.88 · MODIS alone ×0.89" | "Agni converts the old MODIS years into today's VIIRS units, validated year by year. The fake jump disappears." |
 | 14–22 s | Scroll to "Annual totals and trend" | "And the conclusion flips: in the Chittagong Hill Tracts, burning is not increasing, it is decreasing by about 470 hotspots a year." |
 | 22–30 s | Scroll up to "This month vs history", then click **Raw detections (CSV)** | "Any area, any month against 25 years of history, with the evidence one click away. Agni: when MODIS goes dark, its history lives on." |
 
@@ -27,7 +27,7 @@ desktop browser at ~1440 px wide, light or dark mode consistently, and close oth
 - Say: "NASA's MODIS satellites have recorded fires since 2000; VIIRS since 2012. VIIRS sees about five times more fires, because its pixels are smaller. Joined naively, fire seems to explode in 2012: three times more in the hills of Chittagong."
 
 ### 2. Harmonize (0:20–0:45)
-- Screen: click **Harmonized**; point at the readout under the chart title.
+- Screen: on "One record from two sensor families", click **Replay**: the raw line holds for ~1 s with its 2012 jump, then morphs into the harmonized record while the P10–P90 band fades in (it also plays once when the chart first scrolls into view). Then click **Harmonized** in the mode toggle (season and annual charts animate to the new values) and point at the readout under the chart title.
 - Say: "Agni learns, in each one-degree tile and season, how many VIIRS fires one MODIS fire corresponds to, using 14 years when both satellites flew. The jump disappears: the harmonized change matches what MODIS alone sees, ×0.88 vs ×0.89."
 - Then open **Method** in the header: point at the table (local ratio R² 0.952) and the held-out chart.
 - Say: "We test it honestly: every year is predicted by a model that never saw it. Held-out R² 0.95 on tile totals. And we found that the ratio depends on the kind of fire: about 3 in the jhum hills, 6 to 8 in the plains."

@@ -29,6 +29,28 @@ test("explorer: preset area renders every panel from real data", async ({ page }
   await expect(page.getByText(/Change from 2009–11 to 2012–14/)).toBeVisible();
 });
 
+test("explorer: the raw record morphs into the harmonized one, and replays", async ({ page }) => {
+  await page.goto("/");
+  await waitForAnalysis(page);
+  const panel = page.getByText("One record from two sensor families", { exact: true });
+  await panel.scrollIntoViewIfNeeded();
+  await expect(page.getByText("Harmonized: the 2012 jump is gone.")).toBeVisible();
+  await page.getByRole("button", { name: "Replay" }).click();
+  await expect(page.getByText(/^Raw record: MODIS until 2011/)).toBeVisible();
+  await expect(page.getByText("Harmonized: the 2012 jump is gone.")).toBeVisible();
+});
+
+test("explorer: reduced motion shows the final chart without the replay control", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto("/");
+  await waitForAnalysis(page);
+  await expect(page.getByRole("button", { name: "Replay" })).toHaveCount(0);
+  await context.close();
+});
+
 test("explorer: raw / harmonized toggle changes the units", async ({ page }) => {
   await page.goto("/");
   await waitForAnalysis(page);
