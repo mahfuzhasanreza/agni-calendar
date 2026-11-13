@@ -43,7 +43,7 @@ months VIIRS S-NPP reports **5.0× more detections** than MODIS Terra + Aqua, so
 | Feb 2012 – Oct 2026 | VIIRS S-NPP observed (NRT files for Aug–Oct 2026) | `observed` / `observed_nrt` |
 | Nov 2026 → | VIIRS NOAA-20, calibrated onto S-NPP | `n20_calibrated` |
 
-*S-NPP data end on 1 Nov 2026.* The last full S-NPP month (Oct 2026) and any region-wide S-NPP
+*S-NPP data end on 1 Nov 2026* in our download. NASA announced that Suomi NPP stopped delivering data at 15:40 UTC on 2 November 2026 and directed users to NOAA-20 and NOAA-21 ([Earthdata alert](https://www.earthdata.nasa.gov/data/alerts-outages/reminder-new-suomi-npp-observations-cease-november-2-2026)). The last full S-NPP month (Oct 2026) and any region-wide S-NPP
 outage are found from the data (S-NPP < ½ NOAA-20 in a month with ≥ 200 NOAA-20 detections);
 none were found in 2018–2026. NOAA-20 ≈ S-NPP (ratio 0.98–1.03 per year), and the NOAA-20 → S-NPP
 calibration validates at R² 0.992 on held-out tile-months.
@@ -138,6 +138,8 @@ over complete years from 2003.
 - MODIS orbital drift: the yearly VIIRS/MODIS ratio stays within 4.9–5.4 for 2013–2025 with no trend,
   so the whole overlap is used; this should be re-checked as Terra/Aqua drift further.
 - Partial S-NPP outages within a month are not detected (only region-wide outages).
+- NOAA-21 (the other S-NPP successor named by NASA) is not loaded yet; NOAA-20 alone continues the
+  VIIRS reference after S-NPP.
 - Preset areas are approximate boxes. Dates are UTC.
 
 ## Data
@@ -145,3 +147,11 @@ over complete years from 2003.
 NASA FIRMS: MODIS Collection 6.1 (Terra, Aqua) and VIIRS 375 m Collection 2 (S-NPP, NOAA-20),
 standard archive + NRT, downloaded 2026-11-12. Code: `pipeline/agni/` (calibrate.py, validate.py,
 harmonize.py); tests: `pipeline/tests/`.
+
+Detection algorithms: Giglio, Schroeder & Justice (2016), MODIS Collection 6 active fire,
+[doi:10.1016/j.rse.2016.02.054](https://doi.org/10.1016/j.rse.2016.02.054); Schroeder et al. (2014),
+VIIRS 375 m active fire, [doi:10.1016/j.rse.2013.12.008](https://doi.org/10.1016/j.rse.2013.12.008).
+
+Caveats (FIRMS): FIRMS data are provided "as is" ([LANCE disclaimer](https://www.earthdata.nasa.gov/data/projects/lance/disclaimer)). A hotspot is the centre of a ~1 km (MODIS) or 375 m (VIIRS) pixel containing one or more fires or thermal anomalies, not the exact fire location; fires can be missed under cloud, smoke or canopy, when small or cool, or between overpasses. Times are UTC.
+
+Acknowledgement: We acknowledge the use of data and/or imagery from NASA's Fire Information for Resource Management System (FIRMS) (https://earthdata.nasa.gov/firms), operated by NASA's ESDIS project as part of LANCE.

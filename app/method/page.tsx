@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MethodReport } from "@/components/method/MethodReport";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
+import {
+  ALGORITHM_REFERENCES,
+  FIRMS_ACKNOWLEDGEMENT,
+  FIRMS_CAVEATS,
+  FIRMS_URLS,
+  SNPP_END_NOTICE,
+} from "@/lib/firms";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,7 +21,7 @@ const STEPS = [
   ["Grid", "Count detections per 0.1° cell per month, 2000 to today."],
   [
     "Pick consistent references",
-    "MODIS = Terra + Aqua (Terra alone before July 2002, scaled up); VIIRS = S-NPP, continued by NOAA-20 after S-NPP stopped in November 2026.",
+    "MODIS = Terra + Aqua (Terra alone before July 2002, scaled up); VIIRS = S-NPP, continued by NOAA-20 after NASA announced the end of S-NPP data on 2 November 2026.",
   ],
   [
     "Calibrate on the overlap",
@@ -104,6 +111,69 @@ export default function MethodPage() {
           </CardContent>
         </Card>
         <MethodReport />
+        <Card id="data-caveats">
+          <CardHeader>
+            <CardTitle>
+              <h2>Data, citations and caveats</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 text-sm leading-relaxed">
+            <p>
+              All hotspots come from{" "}
+              <a className="underline underline-offset-4" href={FIRMS_URLS.home}>
+                NASA FIRMS
+              </a>
+              : MODIS Collection 6.1 active fire (Terra, Aqua) and VIIRS 375 m Collection 2 active
+              fire (S-NPP, NOAA-20), standard archive plus near-real-time files, downloaded 12
+              November 2026.
+            </p>
+            <p className="rounded-lg border p-3">
+              <strong>Acknowledgement.</strong> {FIRMS_ACKNOWLEDGEMENT}
+            </p>
+            <p>
+              <strong>Sensor handover.</strong>{" "}
+              <a className="underline underline-offset-4" href={FIRMS_URLS.snppCessation}>
+                {SNPP_END_NOTICE}
+              </a>{" "}
+              The last S-NPP detection in our download is from 1 November 2026. Agni already
+              continues the reference with NOAA-20, calibrated onto S-NPP over their 2018–2026
+              overlap (held-out tile-month R² 0.992), so the record survives its second sensor
+              handover. NOAA-21 is not yet loaded.
+            </p>
+            <div>
+              <h3 className="text-base font-semibold">Detection algorithms</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+                {ALGORITHM_REFERENCES.map((r) => (
+                  <li key={r.doi}>
+                    {r.text}{" "}
+                    <a className="underline underline-offset-4" href={`https://doi.org/${r.doi}`}>
+                      doi:{r.doi}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-base font-semibold">What a hotspot is, and is not (FIRMS)</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+                {FIRMS_CAVEATS.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+              <p className="mt-2 text-muted-foreground">
+                Details:{" "}
+                <a className="underline underline-offset-4" href={FIRMS_URLS.faq}>
+                  FIRMS FAQ
+                </a>{" "}
+                and the{" "}
+                <a className="underline underline-offset-4" href={FIRMS_URLS.lanceDisclaimer}>
+                  LANCE disclaimer
+                </a>
+                . The same notes are appended to every detections CSV as <code>#</code> lines.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </main>
       <SiteFooter />
     </div>

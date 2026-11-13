@@ -9,6 +9,7 @@ import { createReadStream } from "node:fs";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { BboxTuple } from "@/lib/aoi";
+import { csvNoteLines } from "@/lib/firms";
 
 /** Public Vercel Blob location of the tiles (dataset version data-v1). */
 export const DEFAULT_TILES_BASE_URL =
@@ -104,7 +105,8 @@ export type ExportOptions = {
 
 /**
  * CSV lines (header first) of every detection inside the AOI and date range, across tiles.
- * Yields a final "# …" note line when maxRows is reached.
+ * Yields a "# truncated …" note line when maxRows is reached, then the FIRMS acknowledgement and
+ * caveats as trailing "# …" lines (pandas: read_csv(..., comment="#")).
  */
 export async function* exportDetections(opt: ExportOptions): AsyncGenerator<string> {
   const manifest = await getManifest();
@@ -127,8 +129,10 @@ export async function* exportDetections(opt: ExportOptions): AsyncGenerator<stri
       yield line;
       if (++rows >= opt.maxRows) {
         yield `# truncated at ${opt.maxRows.toLocaleString("en-US")} rows: choose a smaller area or date range`;
+        yield* csvNoteLines();
         return;
       }
     }
   }
+  yield* csvNoteLines();
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FIRMS_URLS } from "@/lib/firms";
 import { site } from "@/lib/site";
 
 /** Title + navigation shared by every page. */
@@ -36,7 +37,15 @@ export function SiteHeader({ current }: { current: "explorer" | "method" }) {
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t pt-4 text-xs text-muted-foreground">
-      {site.dataCredit} Built for the NASA Space Apps Challenge 2026 ·{" "}
+      {site.dataCredit} We acknowledge the use of data and/or imagery from NASA&apos;s{" "}
+      <a className="underline underline-offset-4" href={FIRMS_URLS.home}>
+        Fire Information for Resource Management System (FIRMS)
+      </a>
+      , operated by NASA ESDIS (LANCE). Data are provided &quot;as is&quot;:{" "}
+      <Link className="underline underline-offset-4" href="/method#data-caveats">
+        caveats
+      </Link>
+      . Built for the NASA Space Apps Challenge 2026 ·{" "}
       <a className="underline underline-offset-4" href={site.repoUrl}>
         Source code
       </a>{" "}

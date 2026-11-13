@@ -16,9 +16,12 @@ test("explorer: preset area renders every panel from real data", async ({ page }
     "Fire season profile",
     "Annual totals and trend",
     "Download the evidence",
+    "Live fires and alerts",
   ]) {
     await expect(page.getByText(name, { exact: true })).toBeVisible();
   }
+  // FIRMS hand-over: the area's box in the west,south,east,north form FIRMS alerts accept.
+  await expect(page.getByTestId("firms-bbox")).toHaveText(/^[\d.]+,[\d.]+,[\d.]+,[\d.]+$/);
   // Calendar table view has year rows with numbers.
   await page.getByText("Show the calendar as a table").click();
   await expect(page.getByRole("rowheader", { name: "2015" })).toBeVisible();
@@ -89,8 +92,10 @@ test("exports: detections CSV from the tiles", async ({ request }) => {
   expect(lines[0]).toBe(
     "date,time_utc,lat,lon,sensor,satellite,confidence,conf_class,qualified,frp,brightness,bright_t31,daynight,type,source",
   );
-  expect(lines.length).toBeGreaterThan(10);
-  expect(lines.slice(1).every((l) => l.startsWith("2014-"))).toBe(true);
+  const data = lines.slice(1).filter((l) => !l.startsWith("#"));
+  expect(data.length).toBeGreaterThan(10);
+  expect(data.every((l) => l.startsWith("2014-"))).toBe(true);
+  expect(lines.at(-1)).toMatch(/^# /); // FIRMS acknowledgement + caveats at the end
 });
 
 test("method page shows the live validation report", async ({ page }) => {
@@ -101,6 +106,8 @@ test("method page shows the live validation report", async ({ page }) => {
   await expect(page.getByText("Validation: leave one year out")).toBeVisible();
   await expect(page.getByText(/\(selected\)/)).toBeVisible();
   await expect(page.getByRole("img", { name: /Held-out validation/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Data, citations and caveats" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "doi:10.1016/j.rse.2013.12.008" })).toBeVisible();
 });
 
 test("accessibility: no serious or critical axe violations @phone", async ({ page }) => {

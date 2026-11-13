@@ -112,7 +112,7 @@ User accounts/auth, burned-area products, fire spread prediction, mobile app.
 
 - `type=0` rows across all archives: **5.94 M**. `type=2` is ~10% of VIIRS rows. 0.1° cells ever active: **7,512**.
 - The download already includes NRT files up to Nov 2026, so the "recent months" backfill needs no API call for MVP.
-- **S-NPP data stops on 2026-11-01** (FIRMS also lists S-NPP availability as ending 2 Nov 2026). NOAA-20 counts are nearly identical to S-NPP in overlap years, so NOAA-20 calibrated onto S-NPP (2018–2026 overlap) is the continuation of the reference. Check FIRMS news for S-NPP status.
+- **S-NPP data stops on 2026-11-01** in our download. NASA confirmed (Earthdata alert): S-NPP stopped delivering data at 15:40 UTC on 2 Nov 2026; users are directed to NOAA-20 and NOAA-21. NOAA-20 counts are nearly identical to S-NPP in overlap years, so NOAA-20 calibrated onto S-NPP (2018–2026 overlap) is the continuation of the reference. Check FIRMS news for S-NPP status.
 - Terra has ~¼ of Aqua's detections every year (morning vs afternoon overpass), so the Terra-only scaling for Nov 2000–Jun 2002 is a factor of ~4–5 with large uncertainty. Keep the flag and wide bands.
 
 ### 4.3 Raw data placement
@@ -194,6 +194,8 @@ Accessible color ramps only: **viridis / cividis** for the heatmap; never red-gr
 - shadcn/ui uses the **Base UI** flavour (`@base-ui/react`): `ToggleGroup` values are arrays.
 - MapLibre 6 + Turbopack: the worker is copied to `public/vendor/` on `postinstall` (`scripts/copy-maplibre-worker.mjs`) and set with `setWorkerUrl`; without it the map stays blank ("Worker failed to load"). The map uses `cooperativeGestures` (Ctrl/⌘ + scroll to zoom) so page scrolling works. MapLibre is client-only (`next/dynamic` with `ssr: false`).
 - Drawing uses terra-draw (`rectangle`, `polygon`, idle `static` mode).
+
+**Official FIRMS alignment (2026-11-13):** `lib/firms.ts` holds the FIRMS acknowledgement, algorithm DOIs (Giglio 2016, Schroeder 2014), caveats and links (single source for the footer, Method page "Data, citations and caveats" `#data-caveats`, and the trailing `#` note lines of the detections CSV). The explorer's "Live fires and alerts" panel links the FIRMS Fire Map and email alerts; FIRMS documents **no Fire Map deep-link format**, so don't invent one; the area's box is shown as `west,south,east,north` for the alert Custom Region.
 
 ## 7. Architecture
 
