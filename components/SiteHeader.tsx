@@ -52,8 +52,7 @@ export function SiteFooter() {
       . Built for the NASA Space Apps Challenge 2026 ·{" "}
       <a className="underline underline-offset-4" href={site.repoUrl}>
         Source code
-      </a>{" "}
-      · Built with Claude Code (AI-assisted development, see the project page).
+      </a>
     </footer>
   );
 }
