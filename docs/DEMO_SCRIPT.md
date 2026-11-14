@@ -50,6 +50,8 @@ Md. Asaduzzaman Shuvo (Data Analyst). All members are adults.
   opens the app; chips: free, no login · any area · 25 years · CSV downloads · works on phones;
   "Data: NASA FIRMS (MODIS, VIIRS)". No NASA logo.
 - **Subtitles:** one line at a time, black text (thin white edge), no background box.
+  No subtitle for "Agni: twenty-five years…" (the title card shows it; only "This is") or for
+  "Thank you!". No label chips at the top of the app shots.
 - Build: `~/projects/agni-video/build/prep_face.sh` then `python3 build/make_video.py`
   (ffmpeg + Pillow) → `agni-demo.mp4`, 28.8 s, 1080p, burned-in English subtitles, −16 LUFS.
 
