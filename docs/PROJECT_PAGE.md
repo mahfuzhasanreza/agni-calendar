@@ -91,7 +91,8 @@ checks against the data. We made every decision (method, scope, hosting), review
 verified every reported number against the pipeline output. SI-assisted code is acknowledged in
 the repository README, in docs/AI_USAGE.md (a dated log) and in the commit metadata
 (Co-Authored-By lines). The app uses no SI at runtime, and no SI-generated images, video or audio
-are used.
+are used. The demo video was edited (cuts, subtitles, title cards) with AI-assisted scripts; all
+footage, photos and the voice are our own.
 
 ## NASA Data
 - **FIRMS MODIS Collection 6.1 active fire** (Terra, Aqua), standard archive + near-real-time,
@@ -142,5 +143,5 @@ NumPy, psycopg, pytest, Vitest, Playwright, axe-core.
 
 **AI tool.** Claude Code (Anthropic), see *Use of Super Intelligence*.
 
-**Demo video.** Screen recordings of our own app; no third-party music or images
-_(list any music and its licence here if you add some)_.
+**Demo video.** Screen recordings of our own app, our own camera footage and team photos; no music
+and no third-party images. Edited with ffmpeg and Pillow (scripts written with Claude Code).

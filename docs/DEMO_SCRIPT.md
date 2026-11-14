@@ -35,19 +35,20 @@ fire explosion" first. The
 challenge name is on screen at 0:02–0:05 (*Harmonization of MODIS and VIIRS Hot Spots*), so it
 need not be spoken.
 
-## Team card and end card
+## Team card and end card (as built, 2026-11-15)
 
-The guide asks the video to say who you are and your team name (member names are required only for
-slide decks). To save seconds, the team is shown **on screen**, not read aloud:
+Team (from `team.txt`): Mahfuz Hasan Reza (Team Leader, Full-Stack Developer, Video Editor),
+Shadab Yasar (AI/ML Engineer), Jiyasmin Akter Sinthiya (Researcher & Storyteller),
+Md. Asaduzzaman Shuvo (Data Analyst). All members are adults.
 
-- **Opening overlay (0:00–0:03)**, lower third over the app, large readable text:
-  `Team Dabanol` and one line per member: `Name — role`. Suggested roles (use what each person
-  really did): *Data & harmonization method*, *Web app & 3D map*, *Story, design & video*.
-- **End card (last 2–4 s)**: Agni logo/title, `agni-calendar.vercel.app`, `Team Dabanol: Name 1 ·
-  Name 2 · Name 3`, `Data: NASA FIRMS (MODIS, VIIRS)`. Plain text on a dark or light background;
-  no NASA logo (the guide forbids NASA branding in SI-generated content; keeping it out of all
-  your graphics is the safe choice).
-- Names only as people want them shown publicly; no one under 18 may appear.
+- **Presenter on camera:** Sinthiya reads the script (5 clips + "Thank you"). Opening: her video in a
+  large rounded frame beside "Team Dabanol · Bangladesh" and the 4 photos popping in; the frame then
+  shrinks into a picture-in-picture corner while the app plays, and grows back to the centre for
+  the closing line.
+- **End card:** Agni অগ্নি, agni-calendar.vercel.app, the 4 photos with full names and roles,
+  "Data: NASA FIRMS (MODIS, VIIRS)". No NASA logo.
+- Build: `~/projects/agni-video/build/prep_face.sh` then `python3 build/make_video.py`
+  (ffmpeg + Pillow) → `agni-demo.mp4`, 28.8 s, 1080p, burned-in English subtitles, −16 LUFS.
 
 ## Recording checklist
 
