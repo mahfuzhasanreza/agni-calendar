@@ -11,7 +11,7 @@ The guide's timing: 0:00 who you are → 0:02 the challenge and why → 0:05 pro
 
 ## Script
 
-| Time | Screen (record each shot separately, cut together) | Voice-over (≈ 72 words) | On-screen text |
+| Time | Screen (record each shot separately, cut together) | Voice-over (≈ 83 words) | On-screen text |
 |---|---|---|---|
 | 0:00–0:03 | Agni home page, header visible, with the **team card overlaid** on the lower third | "Hi, we're team Dabanol, from Bangladesh." | **Team Dabanol** · Name 1, *role* · Name 2, *role* · Name 3, *role* |
 | 0:03–0:05 | Explorer, Chittagong Hill Tracts preset, map zooms in | "Every spring, the hills near my home burn." | *Harmonization of MODIS and VIIRS Hot Spots* |
@@ -19,7 +19,7 @@ The guide's timing: 0:00 who you are → 0:02 the challenge and why → 0:05 pro
 | 0:10–0:15 | Click **Replay**: the raw line morphs into the harmonized line | "In 2012, NASA's VIIRS sensor began seeing five times more fires than MODIS, faking a fire explosion. Agni calibrates MODIS onto VIIRS, and the jump disappears." | Raw ×3.05 → Harmonized ×0.88 |
 | 0:15–0:20 | 3D fire map, **Raw**: slider 2011 → 2012 (region lights up); switch **Harmonized**, 2011 → 2012 | (continues) | NASA FIRMS · MODIS + VIIRS · 5.9 M hotspots |
 | 0:20–0:25 | Burning calendar (Feb–Apr jhum season), then the "This month vs history" label, then click **Raw detections (CSV)** | "Draw any area: see its burning season, this month's anomaly, and download the evidence." | Calendar · Anomaly · CSV |
-| 0:25–0:29 | Harmonized annual chart, then the **end card** (hold ≥ 2 s) | "When MODIS goes dark, its history lives on." | End card: **Agni** · agni-calendar.vercel.app · Team Dabanol: Name 1 · Name 2 · Name 3 · *NASA FIRMS data* |
+| 0:25–0:29 | Harmonized annual chart, then the **end card** (hold ≥ 2 s) | "So responders know if a fire season is truly unusual. When MODIS goes dark, its history lives on." | End card: **Agni** · agni-calendar.vercel.app · Team Dabanol: Name 1 · Name 2 · Name 3 · *NASA FIRMS data* |
 
 Voice-over as one paragraph (read it aloud with a stopwatch; it must fit in 28 s):
 
@@ -27,9 +27,11 @@ Voice-over as one paragraph (read it aloud with a stopwatch; it must fit in 28 s
 > twenty-five years of fire history, one consistent calendar. In 2012, NASA's VIIRS sensor began
 > seeing five times more fires than MODIS, faking a fire explosion. Agni calibrates MODIS onto VIIRS,
 > and the jump disappears. Draw any area: see its burning season, this month's anomaly, and
-> download the evidence. When MODIS goes dark, its history lives on.
+> download the evidence. So responders know if a fire season is truly unusual. When MODIS goes dark,
+> its history lives on.
 
-About 72 words ≈ 28 s at a calm pace. If it runs long, cut "faking a fire explosion" first. The
+About 83 words ≈ 29 s at a brisk pace; check with a stopwatch. If it runs over 30 s, cut "faking a
+fire explosion" first. The
 challenge name is on screen at 0:02–0:05 (*Harmonization of MODIS and VIIRS Hot Spots*), so it
 need not be spoken.
 
