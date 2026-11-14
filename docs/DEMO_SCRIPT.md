@@ -37,16 +37,19 @@ need not be spoken.
 
 ## Team card and end card (as built, 2026-11-15)
 
-Team (from `team.txt`): Mahfuz Hasan Reza (Team Leader, Full-Stack Developer, Video Editor),
-Shadab Yasar (AI/ML Engineer), Jiyasmin Akter Sinthiya (Researcher & Storyteller),
+Team (from `team.txt`): Mahfuz Hasan Reza (Team Leader, Full-Stack Developer),
+Jiyasmin Akter Sinthiya (Researcher & Storyteller), Shadab Yasar (AI/ML Engineer),
 Md. Asaduzzaman Shuvo (Data Analyst). All members are adults.
 
 - **Presenter on camera:** Sinthiya reads the script (5 clips + "Thank you"). Opening: her video in a
-  large rounded frame beside "Team Dabanol · Bangladesh" and the 4 photos popping in; the frame then
+  large rounded frame beside "Team Dabanol · Bangladesh" and the 4 photos (rectangles, with full
+  names and designations) popping in; the frame then
   shrinks into a picture-in-picture corner while the app plays, and grows back to the centre for
   the closing line.
-- **End card:** Agni অগ্নি, agni-calendar.vercel.app, the 4 photos with full names and roles,
+- **End card (no team info):** a browser window pops in, types https://agni-calendar.vercel.app and
+  opens the app; chips: free, no login · any area · 25 years · CSV downloads · works on phones;
   "Data: NASA FIRMS (MODIS, VIIRS)". No NASA logo.
+- **Subtitles:** one line at a time, black text (thin white edge), no background box.
 - Build: `~/projects/agni-video/build/prep_face.sh` then `python3 build/make_video.py`
   (ffmpeg + Pillow) → `agni-demo.mp4`, 28.8 s, 1080p, burned-in English subtitles, −16 LUFS.
 
