@@ -1,13 +1,7 @@
 # Agni demo video (30 seconds)
 
 Follows the **2026 Project Submission Guide**: the demo is **one video of 30 seconds or less**
-(or a slide deck of at most 7 slides). **Over 30 s = not eligible for Global Judging**, so aim
-for **27–28 s**. English voice-over (or another language **with English subtitles**). Host it
-publicly (YouTube "Unlisted" or "Public", no login) and paste the link into *Link to Project Demo*.
-Every number below is real and visible in the app.
-
-The guide's timing: 0:00 who you are → 0:02 the challenge and why → 0:05 project name + tagline →
-0:10 how it works, the user, the NASA data → 0:20–0:30 the future.
+(or a slide deck of at most 7 slides).
 
 ## Script
 

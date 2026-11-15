@@ -92,5 +92,3 @@ We acknowledge the use of data and/or imagery from NASA's Fire Information for R
 Algorithms: Giglio et al. 2016 ([doi:10.1016/j.rse.2016.02.054](https://doi.org/10.1016/j.rse.2016.02.054)), Schroeder et al. 2014 ([doi:10.1016/j.rse.2013.12.008](https://doi.org/10.1016/j.rse.2013.12.008)). Caveats: FIRMS data are provided "as is" ([LANCE disclaimer](https://www.earthdata.nasa.gov/data/projects/lance/disclaimer)). A hotspot is the centre of a ~1 km (MODIS) or 375 m (VIIRS) pixel containing one or more fires or thermal anomalies, not the exact fire location; fires can be missed under cloud, smoke or canopy, when small or cool, or between overpasses. Times are UTC.
 
 Basemap: OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors.
-
-Built with Claude Code (Anthropic): see [`docs/AI_USAGE.md`](docs/AI_USAGE.md).

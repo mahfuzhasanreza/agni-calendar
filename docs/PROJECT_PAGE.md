@@ -145,3 +145,5 @@ NumPy, psycopg, pytest, Vitest, Playwright, axe-core.
 
 **Demo video.** Screen recordings of our own app, our own camera footage and team photos; no music
 and no third-party images. Edited with ffmpeg and Pillow (scripts written with Claude Code).
+
+Developed by Team Dabanol, with AI-assisted support from Claude Code (Anthropic). We acknowledge and credit the contributions of both our team and AI tools.
