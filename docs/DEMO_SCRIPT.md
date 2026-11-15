@@ -38,8 +38,8 @@ need not be spoken.
 ## Team card and end card (as built, 2026-11-15)
 
 Team (from `team.txt`): Mahfuz Hasan Reza (Team Leader, Full-Stack Developer),
-Jiyasmin Akter Sinthiya (Researcher & Storyteller), Shadab Yasar (AI/ML Engineer),
-Md. Asaduzzaman Shuvo (Data Analyst). All members are adults.
+Jiyasmin Akter Sinthiya (Storyteller), Shadab Yasar (Data Analyst),
+Md. Asaduzzaman Shuvo (Researcher). All members are adults.
 
 - **Presenter on camera:** Sinthiya reads the script (5 clips + "Thank you"). Opening: "Team Dabanol ·
   Bangladesh" over a centred row of 4 boxes with full names and designations; her box holds her
