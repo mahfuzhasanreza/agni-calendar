@@ -41,11 +41,10 @@ Team (from `team.txt`): Mahfuz Hasan Reza (Team Leader, Full-Stack Developer),
 Jiyasmin Akter Sinthiya (Researcher & Storyteller), Shadab Yasar (AI/ML Engineer),
 Md. Asaduzzaman Shuvo (Data Analyst). All members are adults.
 
-- **Presenter on camera:** Sinthiya reads the script (5 clips + "Thank you"). Opening: her video in a
-  large rounded frame beside "Team Dabanol · Bangladesh" and the 4 photos (rectangles, with full
-  names and designations) popping in; the frame then
-  shrinks into a picture-in-picture corner while the app plays, and grows back to the centre for
-  the closing line.
+- **Presenter on camera:** Sinthiya reads the script (5 clips + "Thank you"). Opening: "Team Dabanol ·
+  Bangladesh" over a centred row of 4 boxes with full names and designations; her box holds her
+  live video (she appears once, no separate photo). Her box then flies into a picture-in-picture
+  corner while the app plays, and grows back to the centre for the closing line.
 - **End card (no team info):** a browser window pops in, types https://agni-calendar.vercel.app and
   opens the app; chips: free, no login · any area · 25 years · CSV downloads · works on phones;
   "Data: NASA FIRMS (MODIS, VIIRS)". No NASA logo.
